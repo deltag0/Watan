@@ -3,16 +3,14 @@
 
 #include <string>
 
-#include "assets.h"
-
-#define MAX_CRITERION 53
+#define MAX_CRITERION 54
 
 // 53 criterions on one board
-class Criterion: public Asset {
+class Criterion {
 
     public:
         Criterion(int display);
-
+        int display; // for testing
 };
 
 

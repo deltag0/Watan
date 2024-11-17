@@ -5,9 +5,9 @@
 
 #include "assets.h"
 
-#define MAX_GOAL 71
+#define MAX_GOAL 72
 
-class Goal: public Asset {
+class Goal {
 
     public:
         Goal(int display);
