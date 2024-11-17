@@ -14,7 +14,7 @@
 class Board {
     public:
         class Tile;
-        Board();
+        Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
         std::vector<Board::Tile *> initialize_tiles(std::vector<Criterion *> &criterias, std::vector<Goal *> &goals, int seed = 0, bool with_seed = false);
 

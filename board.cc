@@ -6,7 +6,7 @@
 #include "stdexcept"
 #include "board.h"
 
-Board::Board(): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullptr) {
+Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullptr) {
     // Initializing every goal
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = new Goal{i};
@@ -17,7 +17,7 @@ Board::Board(): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullp
         all_criterias[i] = new Criterion{i};
     }
 
-    tiles = initialize_tiles(all_criterias, all_goals);
+    tiles = initialize_tiles(all_criterias, all_goals, seed, is_seed);
     link_criteria();
 }
 
