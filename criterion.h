@@ -2,15 +2,22 @@
 #define CRITERION_H
 
 #include <string>
+#include "board.h"
 
 #define MAX_CRITERION 54
 
 // 53 criterions on one board
-class Criterion {
+class Board::Tile::Criterion: public Board::Tile::Asset {
+    friend class Board::Tile;
+    int level;
+
+    // Set the parent tile as the tile with the smallest position
+    Board::Tile *tile;
 
     public:
-        Criterion(int display);
-        int display; // for testing
+        Criterion(int pos);
+        ~Criterion();
+
 };
 
 

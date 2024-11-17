@@ -1,4 +1,3 @@
 #include "criterion.h"
-#include "assets.h"
 
-Criterion::Criterion(int display): display{display} {}
+Board::Tile::Criterion::Criterion(int pos): Asset(pos) {}
