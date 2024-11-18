@@ -13,10 +13,9 @@
 class Board {
     public:
         class Tile;
-        class Tile::Criterion;
         Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
-        std::vector<Tile *> initialize_tiles(std::vector<Tile::Criterion *> &criterias, std::vector<Goal *> &goals, int seed = 0, bool with_seed = false);
+        std::vector<Tile *> initialize_tiles(std::vector<Criterion *> &criterias, std::vector<Goal *> &goals, int seed = 0, bool with_seed = false);
 
     private:
         std::vector<Goal *> all_goals;
@@ -65,6 +64,7 @@ class Board::Tile {
         };
         class Criterion;
         class Goal;
+        bool has_goose = false;
 
         // gets tile position
         int get_pos() const;

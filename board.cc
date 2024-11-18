@@ -15,7 +15,7 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
 
     // Initializing every criterion
     for (int i = 0; i < MAX_CRITERION; i++) {
-        all_criterias[i] = new Criterion{i};
+        all_criterias[i] = new Tile::Criterion{i};
     }
 
     tiles = initialize_tiles(all_criterias, all_goals, seed, is_seed);
@@ -161,12 +161,12 @@ std::vector<Board::Tile *> Board::initialize_tiles(std::vector<Criterion *> &cri
     // Initialize tiles
     for (int i = 0; i < MAX_TILES; i++) {
         Ressources ressource = all_ressources[randomized_idx[i]];
-
         // if the random ressource is Netflix, set the die_value to 0, indicating there is no value to get ressource
         int die_value = ressource == Ressources::NETFLIX ? 0 : die_values[randomized_idx[i]];
 
         Board::Tile *curr_tile = new Board::Tile{ressource, i, die_value, this};
-        tiles[i] = new Board::Tile{ressource, i, die_value, this};
+        if (die_value == 0) curr_tile->has_goose = true;
+        tiles[i] = curr_tile;
     }
 
 
