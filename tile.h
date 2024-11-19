@@ -24,14 +24,6 @@ class Tile {
         // gets tile roll_value
         int get_roll_val() const;
 
-        Tile* get_under() const;
-        Tile* get_top() const;
-        Tile* get_bot_left() const;
-        Tile* get_top_left() const;
-        Tile* get_top_right() const;
-        Tile* get_bot_right() const;
-
-
     private:
         Tile(Resources r, int pos, int roll_value, Board *board);
         Board *board;
@@ -40,6 +32,13 @@ class Tile {
         int roll_value;
         std::vector<Goal *> goals;
         std::vector<Criterion *> criteria;
+
+        Tile* get_under() const;
+        Tile* get_top() const;
+        Tile* get_bot_left() const;
+        Tile* get_top_left() const;
+        Tile* get_top_right() const;
+        Tile* get_bot_right() const;
 
         // could find a way to get rid of this
         friend class Board;

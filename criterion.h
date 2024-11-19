@@ -13,13 +13,14 @@ class Asset;
 // 54 criteria on one board
 class Criterion : public Asset {
     int level = 0;
-    
+
     public:
         Criterion(int pos);
         ~Criterion() = default;
 
-        Tile *get_tile();
+        // could make Board a friend of criterion, but it's alright
         void set_tile(Tile *t);
+        Tile *get_tile();
 };
 
 

@@ -45,9 +45,8 @@ const std::vector<Tile *> &Board::get_tiles() const{
 void Board::link_criteria() {
     int curr = 0;
 
-    // inialize criteria
+    // set up criteriions
     for (int i = 0; i < MAX_TILES; i++) {
-        // conditional check for left and right criteria
         if (i == 0) {
             tiles[i]->criteria[2] = all_criterias[3];
             tiles[i]->criteria[3] = all_criterias[4];
@@ -64,33 +63,36 @@ void Board::link_criteria() {
                 tiles[i]->criteria[5] = all_criterias[curr + 9];
             }
             else {
-                // bottom two criteria
+                // set up bottom two criteria
                 tiles[i]->criteria[4] = all_criterias[curr + 11];
                 tiles[i]->criteria[5] = all_criterias[curr + 12];
             }
         }
-        else {
-            // left and right criteria
+        else {  // set up most tiles. All except 0, 1, 2, 18
+            // set up left and right criteria
             tiles[i]->criteria[2] = all_criterias[curr + 6];
             tiles[i]->criteria[3] = all_criterias[curr + 7];
 
-            // bottom 3 tiles are special
+            // bottom 3 tiles (16, 17, 18) are special
             if (i >= 16) {
                 tiles[i]->criteria[4] = all_criterias[curr + 11];
                 tiles[i]->criteria[5] = all_criterias[curr + 12];
             }
             else {
-                // bottom two criteria
+                // set up bottom two criteria
                 tiles[i]->criteria[4] = all_criterias[curr + 12];
                 tiles[i]->criteria[5] = all_criterias[curr + 13];
             }
         }
 
+        // set up top two criteria
         tiles[i]->criteria[0] = all_criterias[curr];
         curr++;
         tiles[i]->criteria[1] = all_criterias[curr];
         curr++;
 
+        // put this in another function maybe?
+        // For each criteria, set corresponding tile to tile at earliest position
         for (int j = 0; j < 6; j++) {
             if (tiles[i]->criteria[j]->get_tile() == nullptr) {
                 tiles[i]->criteria[j]->set_tile(tiles[i]);

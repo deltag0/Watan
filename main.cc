@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+
     Board board{seed, is_seed};
     int turn = 0;
     int players = 4;
