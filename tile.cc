@@ -1,10 +1,9 @@
 #include "tile.h"
 
-// Tile definitions (cant figure how to get them to another file!)
 
-// criterias and goals initialized with placeholder values
-Tile::Tile(Ressources r, int pos, int roll_value, Board *board)
-: board{board}, ressource{r}, pos{pos}, roll_value{roll_value}, goals(6, nullptr), criterias(6, nullptr) {}
+// criteria and goals initialized with placeholder values
+Tile::Tile(Resources r, int pos, int roll_value, Board *board)
+: board{board}, resource{r}, pos{pos}, roll_value{roll_value}, goals(6, nullptr), criteria(6, nullptr) {}
 
 int Tile::get_pos() const {return pos;}
 
@@ -27,7 +26,7 @@ Tile* Tile::get_top() const {
     return board->tiles[pos - 5];
 }
 
-Tile* Tile::get_bott_left() const {
+Tile* Tile::get_bot_left() const {
     if (pos == 3 || pos == 8 || pos == 13 || pos == 16 || pos == 18) return nullptr;
 
     if (pos == 0 || pos == 17) return board->tiles[pos + 1];
@@ -51,7 +50,7 @@ Tile* Tile::get_top_right() const {
     return board->tiles[pos - 2];
 }
 
-Tile* Tile::get_bott_right() const {
+Tile* Tile::get_bot_right() const {
     if (pos == 17 || pos == 18 || pos == 5 || pos == 10 || pos == 15) return nullptr;
 
     if (pos == 16 || pos == 0) return board->tiles[pos + 2];

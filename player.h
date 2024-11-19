@@ -16,7 +16,7 @@ struct Player {
     // student color
     char color;
 
-    // ressources
+    // resources
     int points;
     int caffeine_count;
     int lab_count;
