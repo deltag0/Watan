@@ -1,6 +1,6 @@
 #include "criterion.h"
 
-Criterion::Criterion(int pos): Asset(pos), tile{nullptr} {}
+Criterion::Criterion(int pos): Asset(pos) {}
 
 Tile *Criterion::get_tile() {return tile;}
 

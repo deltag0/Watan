@@ -20,22 +20,22 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
     tiles = initialize_tiles(all_goals, seed, is_seed);
     link_criteria();
     link_goals();
-    for (Tile *&t : tiles) {
-        std::cout << "Tile " << t->get_pos() << ":" << "\n";
-        std::cout << "Criteria 0:" << t->criteria[0]->get_pos() << "\n";
-        std::cout << "Criteria 1:" << t->criteria[1]->get_pos() << "\n";
-        std::cout << "Criteria 2:" << t->criteria[2]->get_pos() << "\n";
-        std::cout << "Criteria 3:" << t->criteria[3]->get_pos() << "\n";
-        std::cout << "Criteria 4:" << t->criteria[4]->get_pos() << "\n";
-        std::cout << "Criteria 5:" << t->criteria[5]->get_pos() << "\n";
+    // for (Tile *&t : tiles) {  <-- debug_print
+    //     std::cout << "Tile " << t->get_pos() << ":" << "\n";
+    //     std::cout << "Criteria 0:" << t->criteria[0]->get_pos() << "\n";
+    //     std::cout << "Criteria 1:" << t->criteria[1]->get_pos() << "\n";
+    //     std::cout << "Criteria 2:" << t->criteria[2]->get_pos() << "\n";
+    //     std::cout << "Criteria 3:" << t->criteria[3]->get_pos() << "\n";
+    //     std::cout << "Criteria 4:" << t->criteria[4]->get_pos() << "\n";
+    //     std::cout << "Criteria 5:" << t->criteria[5]->get_pos() << "\n";
 
-        std::cout << "Goal 0:" << t->goals[0]->get_pos() << "\n";
-        std::cout << "Goal 1:" << t->goals[1]->get_pos() << "\n";
-        std::cout << "Goal 2:" << t->goals[2]->get_pos() << "\n";
-        std::cout << "Goal 3:" << t->goals[3]->get_pos() << "\n";
-        std::cout << "Goal 4:" << t->goals[4]->get_pos() << "\n";
-        std::cout << "Goal 5:" << t->goals[5]->get_pos() << "\n" << std::endl;
-    }
+    //     std::cout << "Goal 0:" << t->goals[0]->get_pos() << "\n";
+    //     std::cout << "Goal 1:" << t->goals[1]->get_pos() << "\n";
+    //     std::cout << "Goal 2:" << t->goals[2]->get_pos() << "\n";
+    //     std::cout << "Goal 3:" << t->goals[3]->get_pos() << "\n";
+    //     std::cout << "Goal 4:" << t->goals[4]->get_pos() << "\n";
+    //     std::cout << "Goal 5:" << t->goals[5]->get_pos() << "\n" << std::endl;
+    // }
 }
 
 const std::vector<Tile *> &Board::get_tiles() const{
@@ -107,8 +107,9 @@ void Board::link_criteria() {
 }
 
 void Board::link_goals() {
-    int add_bl;  // hacky variable used to calculate bottom left goal from top left goal
-    int add_b;  // hacky variable used to calculate bottom goal from top goal
+    int add_bl = -1;  // hacky variable used to calculate bottom left goal from top left goal
+    int add_b = -1;  // hacky variable used to calculate bottom goal from top goal
+    // initialized to avoid compiler warnings
 
     for (int i = 0; i < MAX_TILES; ++i) {
         switch (i) {  // special cases
@@ -170,13 +171,6 @@ void Board::link_goals() {
         tiles[i]->goals[3] = all_goals[tiles[i]->goals[1]->get_pos() + add_bl];  // bottom left goal is top left goal + add_bl
         tiles[i]->goals[4] = all_goals[tiles[i]->goals[3]->get_pos() + 1];  // bottom right goal is bottom left goal + 1
         tiles[i]->goals[5] = all_goals[tiles[i]->goals[0]->get_pos() + add_b];  // bottom goal is top goal + add_b
-
-        // std::cout << "Goal 0:" << tiles[i]->goals[0]->get_pos() << "\n";
-        // std::cout << "Goal 1:" << tiles[i]->goals[1]->get_pos() << "\n";
-        // std::cout << "Goal 2:" << tiles[i]->goals[2]->get_pos() << "\n";
-        // std::cout << "Goal 3:" << tiles[i]->goals[3]->get_pos() << "\n";
-        // std::cout << "Goal 4:" << tiles[i]->goals[4]->get_pos() << "\n";
-        // std::cout << "Goal 5:" << tiles[i]->goals[5]->get_pos() << "\n" << std::endl;
     }
 
 }

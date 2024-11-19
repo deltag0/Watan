@@ -13,8 +13,7 @@ class Asset;
 // 54 criteria on one board
 class Criterion : public Asset {
     int level = 0;
-    Tile *tile;
-
+    
     public:
         Criterion(int pos);
         ~Criterion() = default;

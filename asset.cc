@@ -1,6 +1,6 @@
 #include "asset.h"
 
-Asset::Asset(int pos) : pos{pos}, display{std::to_string(pos)} {}
+Asset::Asset(int pos) : pos{pos}, display{std::to_string(pos)}, tile{nullptr} {}
 
 Asset::~Asset() {}
 

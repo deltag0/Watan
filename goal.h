@@ -11,8 +11,7 @@ class Tile;
 class Asset;
 
 // 72 goals on one board
-class Goal : public Asset {
-    Tile *tile;    
+class Goal : public Asset {  
 
     public:
         Goal(int pos);

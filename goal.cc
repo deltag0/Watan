@@ -1,6 +1,6 @@
 #include "goal.h"
 
-Goal::Goal(int pos) : Asset(pos), tile{nullptr} {}
+Goal::Goal(int pos) : Asset(pos) {}
 
 Tile *Goal::get_tile() {return tile;}
 
