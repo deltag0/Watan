@@ -69,18 +69,16 @@ void Board::link_criteria() {
             }
         }
 
-        for (int j = 0; j < 6; j++) {
-            if (tiles[i]->criterias[j]) {
-                if ((tiles[i]->criterias[j])->get_tile() == nullptr) continue;
-
-                tiles[i]->criterias[j]->set_tile(tiles[i]);
-            }
-        }
-
         tiles[i]->criterias[0] = all_criterias[curr];
         curr++;
         tiles[i]->criterias[1] = all_criterias[curr];
         curr++;
+
+        for (int j = 0; j < 6; j++) {
+            if (tiles[i]->criterias[j]->get_tile() == nullptr) {
+                tiles[i]->criterias[j]->set_tile(tiles[i]);
+            }
+        }
 
         // make this the algorithm form maybe
         if (i == MAX_TILES - 2) curr += 3;

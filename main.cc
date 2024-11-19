@@ -7,6 +7,7 @@
 #include <exception>
 #include <random>
 #include <algorithm>
+#include <assert.h>
 
 #include "board.h"
 #include "criterion.h"
@@ -62,8 +63,6 @@ int main(int argc, char *argv[]) {
         Player {'O'},
         Player {'Y'},
     };
-
-    cout << !(p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won()) << std::endl;
 
     // main loop
     while (!(p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won())) {

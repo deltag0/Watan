@@ -17,10 +17,10 @@ class Board {
         Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
         std::vector<Tile *> initialize_tiles(std::vector<Goal *> &goals, int seed = 0, bool with_seed = false);
+        std::vector<Criterion *>all_criterias; // SHOULD BE PRIVATE (testing)
 
     private:
         std::vector<Goal *> all_goals;
-        std::vector<Criterion *>all_criterias;
         std::vector<Tile *> tiles;
         Tile *goose_tile;
 
