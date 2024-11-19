@@ -2,17 +2,18 @@
 #define CRITERION_H
 
 #include <string>
-#include "board.h"
+#include "tile.h"
+#include "asset.h"
 
 #define MAX_CRITERION 54
 
 class Tile;
+class Asset;
 
-// 54 criterions on one board
-class Criterion {
-    int level;
-    Tile *tile;
-
+// 54 criteria on one board
+class Criterion : public Asset {
+    int level = 0;
+    
     public:
         Criterion(int pos);
         ~Criterion() = default;
@@ -23,3 +24,4 @@ class Criterion {
 
 
 #endif
+

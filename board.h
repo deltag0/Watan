@@ -9,6 +9,10 @@
 #include "criterion.h"
 #include "goal.h"
 
+class Tile;
+class Goal;
+class Criterion;
+
 
 // Main board class
 // Includes Tiles, Goose placement, 
@@ -35,8 +39,8 @@ class Board {
 
 #define MAX_TILES 19
 
-// Available ressources
-enum class Ressources {
+// Available resources
+enum class Resources {
     CAFFEINE,
     LAB,
     LECTURE,
@@ -47,6 +51,6 @@ enum class Ressources {
 
 
 // convert class name to string valued name
-std::string RessourceToString(Ressources ressource);
+std::string ResourceToString(Resources resource);
 
 #endif

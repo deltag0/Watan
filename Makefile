@@ -1,7 +1,7 @@
 CXX = g++ -std=c++20 
 EXEC = run
 CXXFLAGS = -Wall -g -O -MMD
-SOURCES = main.cc assets.cc board.cc criterion.cc goal.cc player.cc tile.cc
+SOURCES = main.cc board.cc asset.cc criterion.cc goal.cc player.cc tile.cc
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(SOURCES:.cc=.d)
 

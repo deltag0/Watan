@@ -19,6 +19,23 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
 
     tiles = initialize_tiles(all_goals, seed, is_seed);
     link_criteria();
+    link_goals();
+    // for (Tile *&t : tiles) {  <-- debug_print
+    //     std::cout << "Tile " << t->get_pos() << ":" << "\n";
+    //     std::cout << "Criteria 0:" << t->criteria[0]->get_pos() << "\n";
+    //     std::cout << "Criteria 1:" << t->criteria[1]->get_pos() << "\n";
+    //     std::cout << "Criteria 2:" << t->criteria[2]->get_pos() << "\n";
+    //     std::cout << "Criteria 3:" << t->criteria[3]->get_pos() << "\n";
+    //     std::cout << "Criteria 4:" << t->criteria[4]->get_pos() << "\n";
+    //     std::cout << "Criteria 5:" << t->criteria[5]->get_pos() << "\n";
+
+    //     std::cout << "Goal 0:" << t->goals[0]->get_pos() << "\n";
+    //     std::cout << "Goal 1:" << t->goals[1]->get_pos() << "\n";
+    //     std::cout << "Goal 2:" << t->goals[2]->get_pos() << "\n";
+    //     std::cout << "Goal 3:" << t->goals[3]->get_pos() << "\n";
+    //     std::cout << "Goal 4:" << t->goals[4]->get_pos() << "\n";
+    //     std::cout << "Goal 5:" << t->goals[5]->get_pos() << "\n" << std::endl;
+    // }
 }
 
 const std::vector<Tile *> &Board::get_tiles() const{
@@ -28,55 +45,55 @@ const std::vector<Tile *> &Board::get_tiles() const{
 void Board::link_criteria() {
     int curr = 0;
 
-    // inialize criterias
+    // inialize criteria
     for (int i = 0; i < MAX_TILES; i++) {
-        // conditional check for left and right criterias
+        // conditional check for left and right criteria
         if (i == 0) {
-            tiles[i]->criterias[2] = all_criterias[3];
-            tiles[i]->criterias[3] = all_criterias[4];
-            tiles[i]->criterias[4] = all_criterias[8];
-            tiles[i]->criterias[5] = all_criterias[9];
+            tiles[i]->criteria[2] = all_criterias[3];
+            tiles[i]->criteria[3] = all_criterias[4];
+            tiles[i]->criteria[4] = all_criterias[8];
+            tiles[i]->criteria[5] = all_criterias[9];
         }
         else if (i <= 2 || i == MAX_TILES - 1) {
-            tiles[i]->criterias[2] = all_criterias[curr + 5];
-            tiles[i]->criterias[3] = all_criterias[curr + 6];
+            tiles[i]->criteria[2] = all_criterias[curr + 5];
+            tiles[i]->criteria[3] = all_criterias[curr + 6];
 
             // bro is special
             if (i == MAX_TILES - 1) {
-                tiles[i]->criterias[4] = all_criterias[curr + 8];
-                tiles[i]->criterias[5] = all_criterias[curr + 9];
+                tiles[i]->criteria[4] = all_criterias[curr + 8];
+                tiles[i]->criteria[5] = all_criterias[curr + 9];
             }
             else {
-                // bottom two criterias
-                tiles[i]->criterias[4] = all_criterias[curr + 11];
-                tiles[i]->criterias[5] = all_criterias[curr + 12];
+                // bottom two criteria
+                tiles[i]->criteria[4] = all_criterias[curr + 11];
+                tiles[i]->criteria[5] = all_criterias[curr + 12];
             }
         }
         else {
-            // left and right criterias
-            tiles[i]->criterias[2] = all_criterias[curr + 6];
-            tiles[i]->criterias[3] = all_criterias[curr + 7];
+            // left and right criteria
+            tiles[i]->criteria[2] = all_criterias[curr + 6];
+            tiles[i]->criteria[3] = all_criterias[curr + 7];
 
             // bottom 3 tiles are special
             if (i >= 16) {
-                tiles[i]->criterias[4] = all_criterias[curr + 11];
-                tiles[i]->criterias[5] = all_criterias[curr + 12];
+                tiles[i]->criteria[4] = all_criterias[curr + 11];
+                tiles[i]->criteria[5] = all_criterias[curr + 12];
             }
             else {
-                // bottom two criterias
-                tiles[i]->criterias[4] = all_criterias[curr + 12];
-                tiles[i]->criterias[5] = all_criterias[curr + 13];
+                // bottom two criteria
+                tiles[i]->criteria[4] = all_criterias[curr + 12];
+                tiles[i]->criteria[5] = all_criterias[curr + 13];
             }
         }
 
-        tiles[i]->criterias[0] = all_criterias[curr];
+        tiles[i]->criteria[0] = all_criterias[curr];
         curr++;
-        tiles[i]->criterias[1] = all_criterias[curr];
+        tiles[i]->criteria[1] = all_criterias[curr];
         curr++;
 
         for (int j = 0; j < 6; j++) {
-            if (tiles[i]->criterias[j]->get_tile() == nullptr) {
-                tiles[i]->criterias[j]->set_tile(tiles[i]);
+            if (tiles[i]->criteria[j]->get_tile() == nullptr) {
+                tiles[i]->criteria[j]->set_tile(tiles[i]);
             }
         }
 
@@ -88,33 +105,98 @@ void Board::link_criteria() {
 }
 
 void Board::link_goals() {
-    // TODO
+    int add_bl = -1;  // hacky variable used to calculate bottom left goal from top left goal
+    int add_b = -1;  // hacky variable used to calculate bottom goal from top goal
+    // initialized to avoid compiler warnings
+
+    for (int i = 0; i < MAX_TILES; ++i) {
+        switch (i) {  // special cases
+            case 0:
+                tiles[i]->goals[0] = all_goals[0];
+                tiles[i]->goals[1] = all_goals[1];
+                add_bl = 5;
+                add_b = 10;
+                break;
+            case 1:
+                tiles[i]->goals[0] = all_goals[3];
+                tiles[i]->goals[1] = all_goals[5];
+                add_bl = 8;
+                add_b = 15;
+                break;
+            case 2:
+                tiles[i]->goals[0] = all_goals[4];
+                break;
+            case 3:
+                tiles[i]->goals[0] = all_goals[9];
+                tiles[i]->goals[1] = all_goals[12];
+                add_b = 17;
+                break;
+            case 5:
+                tiles[i]->goals[0] = all_goals[11];
+                break;
+            case 6:
+                add_bl = 9;
+                add_b = 17;
+                break;
+            case 8:
+                tiles[i]->goals[1] = all_goals[29];
+                add_bl = 8;
+                break;
+            case 11:
+                add_bl = 9;
+                break;
+            case 13:
+                tiles[i]->goals[1] = all_goals[46];
+                add_bl = 8;
+                break;
+            case 16:
+                add_b = 15;
+                break;
+            case 18:
+                add_bl = 5;
+                add_b = 10;
+                break;
+        }
+
+        if (tiles[i]->get_top()) {  // if tile above exists
+            tiles[i]->goals[0] = all_goals[tiles[i]->get_top()->goals[5]->get_pos()];  // top goal is bottom goal of tile above
+        }
+        if (tiles[i]->get_top_left()) {  // if tile in top left exists
+            tiles[i]->goals[1] = all_goals[tiles[i]->get_top_left()->goals[4]->get_pos()];  // top left goal is bottom right goal of top left tile
+        }
+
+        tiles[i]->goals[2] = all_goals[tiles[i]->goals[1]->get_pos() + 1];  // top right goal is top left goal + 1
+        tiles[i]->goals[3] = all_goals[tiles[i]->goals[1]->get_pos() + add_bl];  // bottom left goal is top left goal + add_bl
+        tiles[i]->goals[4] = all_goals[tiles[i]->goals[3]->get_pos() + 1];  // bottom right goal is bottom left goal + 1
+        tiles[i]->goals[5] = all_goals[tiles[i]->goals[0]->get_pos() + add_b];  // bottom goal is top goal + add_b
+    }
+
 }
 
 // returns: vector with all tiles present in the board
 std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed, bool with_seed) {
 
-    // Possible ressources for a board
-    std::vector<Ressources> all_ressources = 
-    {Ressources::TUTORIAL,
-     Ressources::TUTORIAL,
-     Ressources::TUTORIAL,
-     Ressources::STUDY,
-     Ressources::STUDY,
-     Ressources::STUDY,
-     Ressources::CAFFEINE,
-     Ressources::CAFFEINE,
-     Ressources::CAFFEINE,
-     Ressources::CAFFEINE,
-     Ressources::LAB,
-     Ressources::LAB,
-     Ressources::LAB,
-     Ressources::LAB,
-     Ressources::LECTURE,
-     Ressources::LECTURE,
-     Ressources::LECTURE,
-     Ressources::LECTURE,
-     Ressources::NETFLIX};
+    // Possible resources for a board
+    std::vector<Resources> all_resources = 
+    {Resources::TUTORIAL,
+     Resources::TUTORIAL,
+     Resources::TUTORIAL,
+     Resources::STUDY,
+     Resources::STUDY,
+     Resources::STUDY,
+     Resources::CAFFEINE,
+     Resources::CAFFEINE,
+     Resources::CAFFEINE,
+     Resources::CAFFEINE,
+     Resources::LAB,
+     Resources::LAB,
+     Resources::LAB,
+     Resources::LAB,
+     Resources::LECTURE,
+     Resources::LECTURE,
+     Resources::LECTURE,
+     Resources::LECTURE,
+     Resources::NETFLIX};
     
     // Possible die values for a board
     std::vector<int> die_values = 
@@ -155,15 +237,15 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
 
     std::shuffle(randomized_idx.begin(), randomized_idx.end(), rng);
 
-    std::vector<Tile *> tiles(MAX_GOAL, nullptr);
+    std::vector<Tile *> tiles(MAX_TILES, nullptr);
 
     // Initialize tiles
     for (int i = 0; i < MAX_TILES; i++) {
-        Ressources ressource = all_ressources[randomized_idx[i]];
-        // if the random ressource is Netflix, set the die_value to 0, indicating there is no value to get ressource
-        int die_value = ressource == Ressources::NETFLIX ? 0 : die_values[randomized_idx[i]];
+        Resources resource = all_resources[randomized_idx[i]];
+        // if the random resource is Netflix, set the die_value to 0, indicating there is no value to get resource
+        int die_value = resource == Resources::NETFLIX ? 0 : die_values[randomized_idx[i]];
 
-        Tile *curr_tile = new Tile{ressource, i, die_value, this};
+        Tile *curr_tile = new Tile{resource, i, die_value, this};
         if (die_value == 0) curr_tile->has_goose = true;
         tiles[i] = curr_tile;
     }
@@ -175,22 +257,22 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
 
 // General functions
 
-// returns: string value of ressource
-std::string RessourceToString(Ressources ressource) {
-    switch (ressource) {
-        case Ressources::CAFFEINE:
+// returns: string value of resource
+std::string ResourceToString(Resources resource) {
+    switch (resource) {
+        case Resources::CAFFEINE:
             return "CAFFEINE";
-        case Ressources::LAB:
+        case Resources::LAB:
             return "LAB";
-        case Ressources::LECTURE:
+        case Resources::LECTURE:
             return "LECTURE";
-        case Ressources::STUDY:
+        case Resources::STUDY:
             return "STUDY";
-        case Ressources::TUTORIAL:
+        case Resources::TUTORIAL:
             return "TUTORIAL";
-        case Ressources::NETFLIX:
+        case Resources::NETFLIX:
             return "NETFLIX";
         default:
-            throw std::invalid_argument("Invalid Ressources value");
+            throw std::invalid_argument("Invalid Resources value");
     }
 }
