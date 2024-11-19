@@ -25,22 +25,14 @@ struct Player {
     int tutorial_count;
 
     Dice die;
-    std::vector<Board::Tile::Criterion *> owned_criterions;
-    std::vector<Board::Tile::Goal *> owned_goal;
+    std::vector<Criterion *> owned_criterions;
+    std::vector<Goal *> owned_goal;
     Player(char color);
 
     bool won();
 };
 
 // override operator to display status of player
-std::ostream &operator<<(std::ostream &out, Player player) {
-    out << player.color << " has " << player.points << " victory points, "
-    << player.caffeine_count << " caffeines, " << player.lab_count << " labs, "
-    << player.lecture_count << " lectures, " << player.tutorial_count << " tutorials, "
-    << " and " << player.study_count << " studies.";
-
-    return out;
-}
-
+std::ostream &operator<<(std::ostream &out, Player player);
 
 #endif

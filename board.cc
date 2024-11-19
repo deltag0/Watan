@@ -12,17 +12,16 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = new Goal{i};
     }
-
     // Initializing every criterion
     for (int i = 0; i < MAX_CRITERION; i++) {
-        all_criterias[i] = new Tile::Criterion{i};
+        all_criterias[i] = new Criterion{i};
     }
 
-    tiles = initialize_tiles(all_criterias, all_goals, seed, is_seed);
+    tiles = initialize_tiles(all_goals, seed, is_seed);
     link_criteria();
 }
 
-const std::vector<Board::Tile *> &Board::get_tiles() const{
+const std::vector<Tile *> &Board::get_tiles() const{
     return tiles;
 }
 
@@ -71,9 +70,11 @@ void Board::link_criteria() {
         }
 
         for (int j = 0; j < 6; j++) {
-            if (tiles[i]->criterias[j]->get_tile() == nullptr) continue;
+            if (tiles[i]->criterias[j]) {
+                if ((tiles[i]->criterias[j])->get_tile() == nullptr) continue;
 
-            tiles[i]->criterias[j]->set_tile(tiles[i]);
+                tiles[i]->criterias[j]->set_tile(tiles[i]);
+            }
         }
 
         tiles[i]->criterias[0] = all_criterias[curr];
@@ -93,7 +94,7 @@ void Board::link_goals() {
 }
 
 // returns: vector with all tiles present in the board
-std::vector<Board::Tile *> Board::initialize_tiles(std::vector<Criterion *> &criterias, std::vector<Goal *> &goals, int seed, bool with_seed) {
+std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed, bool with_seed) {
 
     // Possible ressources for a board
     std::vector<Ressources> all_ressources = 
@@ -156,7 +157,7 @@ std::vector<Board::Tile *> Board::initialize_tiles(std::vector<Criterion *> &cri
 
     std::shuffle(randomized_idx.begin(), randomized_idx.end(), rng);
 
-    std::vector<Board::Tile *> tiles(MAX_GOAL, nullptr);
+    std::vector<Tile *> tiles(MAX_GOAL, nullptr);
 
     // Initialize tiles
     for (int i = 0; i < MAX_TILES; i++) {
@@ -164,83 +165,13 @@ std::vector<Board::Tile *> Board::initialize_tiles(std::vector<Criterion *> &cri
         // if the random ressource is Netflix, set the die_value to 0, indicating there is no value to get ressource
         int die_value = ressource == Ressources::NETFLIX ? 0 : die_values[randomized_idx[i]];
 
-        Board::Tile *curr_tile = new Board::Tile{ressource, i, die_value, this};
+        Tile *curr_tile = new Tile{ressource, i, die_value, this};
         if (die_value == 0) curr_tile->has_goose = true;
         tiles[i] = curr_tile;
     }
 
 
     return tiles;
-}
-
-
-// Tile definitions (cant figure how to get them to another file!)
-
-// criterias and goals initialized with placeholder values
-Board::Tile::Tile(Ressources r, int pos, int roll_value, Board *board)
-: board{board}, ressource{r}, pos{pos}, roll_value{roll_value}, criterias(6, nullptr), goals(6, nullptr) {}
-
-int Board::Tile::get_pos() const {return pos;}
-
-int Board::Tile::get_roll_val() const {return roll_value;}
-
-Board::Tile* Board::Tile::get_under() const {
-    if (pos == 13 || pos == 16 || pos == 18 || pos == 17 || pos == 15) return nullptr;
-
-    if (pos == 0) return board->tiles[4];
-
-    return board->tiles[pos + 5];
-}
-
-Board::Tile* Board::Tile::get_top() const {
-    if (pos == 3 || pos == 1 || pos == 0 || pos == 2 || pos == 5) return nullptr;
-
-    if (pos == 4 || pos == 18) return board->tiles[pos - 4];
-
-
-    return board->tiles[pos - 5];
-}
-
-Board::Tile* Board::Tile::get_bott_left() const {
-    if (pos == 3 || pos == 8 || pos == 13 || pos == 16 || pos == 18) return nullptr;
-
-    if (pos == 0 || pos == 17) return board->tiles[pos + 1];
-
-    return board->tiles[pos + 2];
-}
-
-Board::Tile* Board::Tile::get_top_left() const {
-    if (pos == 0 || pos == 1 || pos == 3 || pos == 8 || pos == 13) return nullptr;
-
-    if (pos == 2 || pos == 18) return board->tiles[pos - 2];
-
-    return board->tiles[pos - 3];
-}
-
-Board::Tile* Board::Tile::get_top_right() const {
-    if (pos == 0 || pos == 2 || pos == 5 || pos == 10 || pos == 15) return nullptr;
-
-    if (pos == 1 || pos == 18) return board->tiles[pos - 1];
-    
-    return board->tiles[pos - 2];
-}
-
-Board::Tile* Board::Tile::get_bott_right() const {
-    if (pos == 17 || pos == 18 || pos == 5 || pos == 10 || pos == 15) return nullptr;
-
-    if (pos == 16 || pos == 0) return board->tiles[pos + 2];
-
-    return board->tiles[pos + 3];
-}
-
-// Criterion functions
-
-Board::Tile* Board::Tile::Criterion::get_tile() {
-    return tile;
-}
-
-void Board::Tile::Criterion::set_tile(Board::Tile *t) {
-    tile = t;
 }
 
 

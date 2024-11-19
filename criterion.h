@@ -6,18 +6,19 @@
 
 #define MAX_CRITERION 54
 
-// 53 criterions on one board
-class Board::Tile::Criterion: public Board::Tile::Asset {
-    friend class Board::Tile;
-    int level;
+class Tile;
 
-    // Set the parent tile as the tile with the smallest position
-    Board::Tile *tile;
+// 54 criterions on one board
+class Criterion {
+    int level;
+    Tile *tile;
 
     public:
         Criterion(int pos);
-        ~Criterion();
+        ~Criterion() = default;
 
+        Tile *get_tile();
+        void set_tile(Tile *t);
 };
 
 

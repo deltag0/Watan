@@ -7,3 +7,12 @@ bool Player::won() {
 
     return false;
 }
+
+std::ostream &operator<<(std::ostream &out, Player player) {
+    out << player.color << " has " << player.points << " victory points, "
+    << player.caffeine_count << " caffeines, " << player.lab_count << " labs, "
+    << player.lecture_count << " lectures, " << player.tutorial_count << " tutorials, "
+    << " and " << player.study_count << " studies.";
+
+    return out;
+}
