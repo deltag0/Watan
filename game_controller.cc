@@ -16,7 +16,7 @@ p_list{Player {'B', "Blue"},
         Player {'O', "Orange"},
         Player {'Y', "Yellow"},}, sot{true}, turn{0} {}
 
-void Game_Controller::play() {
+bool Game_Controller::play() {
     // main loop
     while (!game_over()) {
         string curr = "";
@@ -40,6 +40,21 @@ void Game_Controller::play() {
             std::getline(cin, curr);
 
             curr = check_command(curr);
+        }
+    }
+    
+    // end of game
+    string ans;
+    cout << "Would you like to play again?" << std::endl;
+    while (cin >> ans) {
+        if (ans == "yes") {
+            return true;
+        }
+        else if (ans == "no") {
+            return false;
+        }
+        else {
+            cout << "Invalid command." << std::endl;
         }
     }
 }
@@ -85,41 +100,41 @@ string Game_Controller::check_command(const string &command) {
         cout << std::endl;
     }
     else if (first == "achieve") {
-        //try to achieve current goal
+        //try to achieve goal at goal #
     }
     else if (first == "complete") {
-        // try to complete the goal
+        // try to complete the criteria at criteria #
     }
     else if (first == "improve") {
-        // try to improve
+        // try to improve criteria at criteria #
     }
     else if (first == "trade") {
         string ans;
         string partner = "";
-        string give_ressource = "";
-        string desired_ressource = "";
-        iss >> partner >> give_ressource >> desired_ressource;
+        string give_resource = "";
+        string desired_resource = "";
+        iss >> partner >> give_resource >> desired_resource;
 
-        Resources ressource1 = StringToResource(give_ressource);
-        int &ressource1_count = p_list[turn].find_resources(ressource1);
+        Resources resource1 = StringToResource(give_resource);
+        int &resource1_count = p_list[turn].find_resources(resource1);
 
-        if (ressource1_count == 0) {
+        if (resource1_count == 0) {
             resource_error();
             return first;
         }
 
-        Resources ressource2 = StringToResource(desired_ressource);
+        Resources resource2 = StringToResource(desired_resource);
 
-        cout << p_list[turn].name << " offers " << partner << " one " << " give_ressource "
-        << " for one " << desired_ressource << ".\n" << "Does " << partner << " acceot this offer?" << '\n';\
+        cout << p_list[turn].name << " offers " << partner << " one " << " give_resource "
+        << " for one " << desired_resource << ".\n" << "Does " << partner << " accept this offer?" << '\n';\
 
         cin >> ans;
 
         if (ans == "yes") {
             int student2 = color_to_name(partner);
-            int &ressource2_count = p_list[student2].find_resources(ressource2);
-            ressource1_count--;
-            ressource2_count++;
+            int &resource2_count = p_list[student2].find_resources(resource2);
+            resource1_count--;
+            resource2_count++;
         }
     }
     else if (first == "next") {
@@ -179,11 +194,11 @@ int Game_Controller::roll_dice() const {
     else {
         int roll = 0;
 
-        while (roll > 12 || roll < 2) {  // while invalid roll
+        while (roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
             cout << "Input a roll between 2 and 12: ";
             cin >> roll;
 
-            if (roll > 12 || roll < 2) cout << "Invalid roll." << std::endl;
+            if (roll > MAX_ROLL || roll < MIN_ROLL) cout << "Invalid roll." << std::endl;
         }
         cin.ignore();
         return roll;

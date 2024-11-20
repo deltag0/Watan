@@ -9,6 +9,8 @@
 #include "criterion.h"
 
 #define NUM_PLAYERS 4
+#define MIN_ROLL 2
+#define MAX_ROLL 12
 
 enum class Dice {
     LOADED,

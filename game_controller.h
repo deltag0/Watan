@@ -29,7 +29,7 @@ class Game_Controller {
         void add_resource(const Resources name, const int player);
         void resource_error() const;
 
-        void play();
+        bool play();
 };
 
 #endif
