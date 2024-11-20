@@ -39,8 +39,13 @@ struct Player {
 
     bool won() const;
     int &find_resources(Resources ressource);
+
     // returns true if player owns goal
-    bool owns_goal(int pos) const;
+    bool owns_goal(const int pos) const;
+
+    // returns true if player owns criterion
+    bool owns_criterion(const int pos) const;
+
 };
 
 // override operator to display status of player

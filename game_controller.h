@@ -8,6 +8,10 @@ using std::string;
 #include "board.h"
 #include "player.h"
 
+const string invalid_message = "Invalid command.";
+const string invalid_ressources = "You do not have enough resources";
+const string invalid_place = "You cannot build here";
+
 class Game_Controller {
     Board &board;
     Player p_list[NUM_PLAYERS];
@@ -19,9 +23,7 @@ class Game_Controller {
         Game_Controller(Board b);
 
         string check_command(const string &command);
-        string invalid_command();
-        string invalid_build();
-        string invalid_ressources();
+        string invalid_command(const string &message);
         int roll_dice() const;
         int color_to_name(const string &color) const;
         void print_turn() const;
@@ -30,6 +32,11 @@ class Game_Controller {
         void remove_resource(const Resources name, const int player);
         void add_resource(const Resources name, const int player);
         void resource_error() const;
+
+        bool is_criterion_owned(const int pos) const;
+        bool is_goal_owned(const int pos) const;
+
+        int get_criterion() const;
 
         void play();
 };

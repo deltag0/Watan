@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <assert.h>
 
 #include "stdexcept"
 #include "board.h"
@@ -261,7 +262,7 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
     return tiles;
 }
 
-// returns true if Player player can achieve goal pos on the board
+// returns true if Player player can connect the goal (but doesn't verify resources)
 bool Board::can_achieve(int pos, Player player) const {
     int position_on_tile = 0;
     Tile *tile = all_goals[pos]->get_tile();
@@ -271,6 +272,14 @@ bool Board::can_achieve(int pos, Player player) const {
             position_on_tile = i;
             break;
         }
+    }
+
+    assert(position_on_tile >= 0 && position_on_tile < 6);
+
+    if ((position_on_tile < 5 && (player.owns_criterion(position_on_tile - 1) || player.owns_criterion(position_on_tile + 1)))
+    || (position_on_tile == 5 && (player.owns_criterion(4) || player.owns_criterion(5))))
+    {
+        return true;
     }
 
     switch (position_on_tile) {

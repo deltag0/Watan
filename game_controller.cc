@@ -17,6 +17,34 @@ p_list{Player {'B', "Blue"},
         Player {'Y', "Yellow"},}, sot{true}, turn{0} {}
 
 void Game_Controller::play() {
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        int pos = 0;
+        cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
+
+        pos = get_criterion();
+
+        while (is_criterion_owned(pos)) {
+            cout << invalid_place << '\n';
+            pos = get_criterion();
+        }
+
+        p_list[i].owned_criterions.insert(pos);
+    }
+    for (int i = NUM_PLAYERS - 1; i >= 0; i--) {
+        int pos = 0;
+        cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
+
+        pos = get_criterion();
+
+        while (is_criterion_owned(pos)) {
+            cout << invalid_place << '\n';
+            pos = get_criterion();
+        }
+        
+        p_list[i].owned_criterions.insert(pos);
+    }
+
     // main loop
     while (!game_over()) {
         string curr = "";
@@ -24,7 +52,7 @@ void Game_Controller::play() {
 
         print_turn();
         print_status();
-
+        cin.ignore();
         // beginning of game commands
         while (curr != "roll") {
             cout << '>';
@@ -60,7 +88,7 @@ string Game_Controller::check_command(const string &command) {
         else if (first == "roll") {
             sot = false;
         }
-        else return invalid_command();
+        else return invalid_command(invalid_message);
 
         return first;
     }
@@ -88,17 +116,17 @@ string Game_Controller::check_command(const string &command) {
         int pos;
         
         if (!(cin >> pos)) {
-            return invalid_command();
+            return invalid_command(invalid_message);
         }
 
         bool can_achieve = board.can_achieve(pos, p_list[turn]);
 
         if (!can_achieve) {
-            return invalid_command();
+            return invalid_command(invalid_place);
         }
 
         if (p_list[turn].study_count == 0 || p_list[turn].tutorial_count == 0) {
-            return invalid_ressources();
+            return invalid_command(invalid_ressources);
         }
 
         p_list[turn].study_count--;
@@ -162,7 +190,7 @@ string Game_Controller::check_command(const string &command) {
         << " save <file>\n"
         << " help" << std::endl;
     }
-    else return invalid_command();
+    else return invalid_command(invalid_message);
 
     return first;
 }
@@ -177,32 +205,10 @@ bool Game_Controller::game_over() const {
 
 void Game_Controller::print_status() const {cout << p_list[turn];}
 
-string Game_Controller::invalid_command() {
+string Game_Controller::invalid_command(const string &message) {
     string new_command = "";
 
-    cout << "Invalid command." << '\n';
-    cout << '>';
-
-    std::getline(cin, new_command);
-
-    return check_command(new_command);
-}
-
-string Game_Controller::invalid_build() {
-    string new_command = "";
-
-    cout << "You cannot build here." << '\n';
-    cout << '>';
-
-    std::getline(cin, new_command);
-
-    return check_command(new_command);
-}
-
-string Game_Controller::invalid_ressources() {
-    string new_command = "";
-
-    cout << "You do not have enough resources." << '\n';
+    cout << message << '\n';
     cout << '>';
 
     std::getline(cin, new_command);
@@ -229,6 +235,36 @@ int Game_Controller::roll_dice() const {
         cin.ignore();
         return roll;
     }
+}
+
+int Game_Controller::get_criterion() const {
+    int pos = 0;
+
+    cout << '>';
+    if (!(cin >> pos) || pos < 0 || pos > MAX_CRITERION - 1) {
+        cout << "You cannot build here.\n";
+        return get_criterion();
+    }
+
+    return pos;
+}
+
+bool Game_Controller::is_criterion_owned(const int pos) const {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        if (p_list[i].owns_criterion(pos)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Game_Controller::is_goal_owned(const int pos) const {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        if (p_list[i].owns_goal(pos)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Game_Controller::add_resource(const Resources name, int player) {

@@ -8,8 +8,14 @@ bool Player::won() const{
     return false;
 }
 
-bool Player::owns_goal(int pos) const {
+bool Player::owns_goal(const int pos) const {
     if (owned_goal.find(pos) != owned_goal.end()) return true;
+    
+    return false;
+}
+
+bool Player::owns_criterion(const int pos) const {
+    if (owned_criterions.find(pos) != owned_criterions.end()) return true;
     
     return false;
 }
