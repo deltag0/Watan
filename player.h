@@ -35,7 +35,7 @@ struct Player {
     Player(char color, std::string name);
 
     bool won() const;
-    int &find_ressources(Resources ressource);
+    int &find_resources(Resources ressource);
 };
 
 // override operator to display status of player

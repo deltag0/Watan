@@ -16,6 +16,34 @@ p_list{Player {'B', "Blue"},
         Player {'O', "Orange"},
         Player {'Y', "Yellow"},}, sot{true}, turn{0} {}
 
+void Game_Controller::play() {
+    // main loop
+    while (!game_over()) {
+        string curr = "";
+        int roll;
+
+        print_turn();
+        print_status();
+
+        // beginning of game commands
+        while (curr != "roll") {
+            cout << '>';
+            std::getline(cin, curr);
+
+            curr = check_command(curr);
+        }
+
+        roll = roll_dice();
+
+        while (curr != "next") {
+            cout << '>';
+            std::getline(cin, curr);
+
+            curr = check_command(curr);
+        }
+    }
+}
+
 string Game_Controller::check_command(const string &command) {
     string first;
     std::istringstream iss{command};
@@ -50,10 +78,11 @@ string Game_Controller::check_command(const string &command) {
         turn = save_turn;
     }
     else if (first == "criteria") {
-        cout << "Student has completed the following criteria: ";
+        cout << "Student has completed the following criteria:";
         for (auto criteria: p_list[turn].owned_criterions) {
-            cout << criteria->get_pos() << " ";
+            cout << " " << criteria->get_pos();
         }
+        cout << std::endl;
     }
     else if (first == "achieve") {
         //try to achieve current goal
@@ -72,10 +101,10 @@ string Game_Controller::check_command(const string &command) {
         iss >> partner >> give_ressource >> desired_ressource;
 
         Resources ressource1 = StringToResource(give_ressource);
-        int &ressource1_count = p_list[turn].find_ressources(ressource1);
+        int &ressource1_count = p_list[turn].find_resources(ressource1);
 
         if (ressource1_count == 0) {
-            ressource_error();
+            resource_error();
             return first;
         }
 
@@ -88,7 +117,7 @@ string Game_Controller::check_command(const string &command) {
 
         if (ans == "yes") {
             int student2 = color_to_name(partner);
-            int &ressource2_count = p_list[student2].find_ressources(ressource2);
+            int &ressource2_count = p_list[student2].find_resources(ressource2);
             ressource1_count--;
             ressource2_count++;
         }
@@ -120,7 +149,7 @@ string Game_Controller::check_command(const string &command) {
 }
 
 void Game_Controller::print_turn() const {
-    cout << "Student " << p_list[turn].name << "'s " << "turn" << std::endl;
+    cout << "Student " << p_list[turn].name << "'s " << "turn." << std::endl;
 }
 
 bool Game_Controller::game_over() const {
@@ -150,7 +179,7 @@ int Game_Controller::roll_dice() const {
     else {
         int roll = 0;
 
-        while (roll > 12 || roll < 2) {
+        while (roll > 12 || roll < 2) {  // while invalid roll
             cout << "Input a roll between 2 and 12: ";
             cin >> roll;
 
@@ -161,11 +190,11 @@ int Game_Controller::roll_dice() const {
     }
 }
 
-void Game_Controller::add_ressource(const Resources name, int player) {
+void Game_Controller::add_resource(const Resources name, int player) {
 
 }
 
-void Game_Controller::remove_ressource(const Resources name, int player) {
+void Game_Controller::remove_resource(const Resources name, int player) {
 
 }
 
@@ -183,4 +212,4 @@ int Game_Controller::color_to_name(const string &color) const {
     }
 }
 
-void Game_Controller::ressource_error() const {cout <<  "You do not have enough resources.\n";}
+void Game_Controller::resource_error() const {cout <<  "You do not have enough resources.\n";}

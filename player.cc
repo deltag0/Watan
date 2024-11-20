@@ -17,7 +17,7 @@ std::ostream &operator<<(std::ostream &out, Player player) {
     return out;
 }
 
-int &Player::find_ressources(Resources ressource) {
+int &Player::find_resources(Resources ressource) {
     switch (ressource) {
         case Resources::CAFFEINE:
             return caffeine_count;

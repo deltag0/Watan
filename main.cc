@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
     string game;
     string loaded_board;
 
+    // handling CLI arguments
     for (int i = 1; i < argc; i++) {
         string arg = argv[i];
         string curr;
@@ -53,33 +54,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-    Board board{seed, is_seed};
-    Game_Controller controller{board};
-
-    // main loop
-    while (!controller.game_over()) {
-        string curr = "";
-        int roll = 0;
-
-        controller.print_turn();
-        controller.print_status();
-
-        // beginning of game commands
-        while (curr != "roll") {
-            cout << '>';
-            std::getline(cin, curr);
-
-            curr = controller.check_command(curr);
-        }
-
-        roll = controller.roll_dice();
-
-        while (curr != "next") {
-            cout << '>';
-            std::getline(cin, curr);
-
-            curr = controller.check_command(curr);
-        }
-    }
+    Game_Controller controller{Board{seed, is_seed}};
+    controller.play();
 }

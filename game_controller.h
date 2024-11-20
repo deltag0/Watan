@@ -25,9 +25,11 @@ class Game_Controller {
         void print_turn() const;
         void print_status() const;
         bool game_over() const;
-        void remove_ressource(const Resources name, const int player);
-        void add_ressource(const Resources name, const int player);
-        void ressource_error() const;
+        void remove_resource(const Resources name, const int player);
+        void add_resource(const Resources name, const int player);
+        void resource_error() const;
+
+        void play();
 };
 
 #endif

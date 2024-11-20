@@ -171,8 +171,13 @@ void Board::link_goals() {
         tiles[i]->goals[3] = all_goals[tiles[i]->goals[1]->get_pos() + add_bl];  // bottom left goal is top left goal + add_bl
         tiles[i]->goals[4] = all_goals[tiles[i]->goals[3]->get_pos() + 1];  // bottom right goal is bottom left goal + 1
         tiles[i]->goals[5] = all_goals[tiles[i]->goals[0]->get_pos() + add_b];  // bottom goal is top goal + add_b
-    }
 
+        for (Goal *&g : tiles[i]->goals) {  // set tile pointer in every goal on current tile to current tile
+            if (!g->get_tile()) {  // tile pointer of g is not already pointing to a tile
+                g->set_tile(tiles[i]);
+            }
+        }
+    }
 }
 
 // returns: vector with all tiles present in the board
