@@ -18,7 +18,6 @@ enum class Dice {
     FAIR
 };
 
-
 struct Player {
     // student color
     char color;

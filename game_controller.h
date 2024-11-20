@@ -5,9 +5,9 @@
 
 using std::string;
 
-struct Player;
-
 #include "board.h"
+
+struct Player;
 
 #define NUM_PLAYERS 4
 #define MIN_ROLL 2
