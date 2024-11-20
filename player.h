@@ -20,7 +20,7 @@ enum class Dice {
     FAIR
 };
 
-class Player {
+struct Player {
     // student color
     char color;
     std::string name;
@@ -37,29 +37,23 @@ class Player {
     // could make these dictionaries
     std::unordered_set<int> owned_criterions;
     std::unordered_set<int> owned_goal;
-    Player(char color, std::string name);
 
-   public:
     bool won() const;
-<<<<<<< HEAD
-    int &find_resources(Resources ressource);
-
-    // returns true if player owns goal
-    bool owns_goal(const int pos) const;
+    int &find_resources(Resources resource);
 
     // returns true if player owns criterion
     bool owns_criterion(const int pos) const;
 
-=======
-    int &find_resources(Resources resource);
     // returns true if player owns goal
     bool owns_goal(int pos) const;
 
-    // print status of player
-    void print() const;
-
     friend class Game_Controller;
->>>>>>> 4d56ff2ca5a46397e7648d2cc4be8c5b94b9a823
+
+   private:
+    Player(char color, std::string name);
 };
+
+// print status of player
+std::ostream &operator<<(std::ostream &out, Player player);
 
 #endif

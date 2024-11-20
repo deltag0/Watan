@@ -53,6 +53,7 @@ bool Game_Controller::play() {
         print_turn();
         print_status();
         cin.ignore();
+        
         // beginning of game commands
         while (curr != "roll") {
             cout << '>';
