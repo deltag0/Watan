@@ -8,6 +8,9 @@ using std::string;
 #include "board.h"
 #include "player.h"
 
+#define MIN_ROLL 2
+#define MAX_ROLL 12
+
 const string invalid_message = "Invalid command.";
 const string invalid_ressources = "You do not have enough resources";
 const string invalid_place = "You cannot build here";
@@ -31,14 +34,15 @@ class Game_Controller {
         bool game_over() const;
         void remove_resource(const Resources name, const int player);
         void add_resource(const Resources name, const int player);
-        void resource_error() const;
 
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
+        bool is_color(string &s) const;
+        bool is_resource(string &s) const;
 
         int get_criterion() const;
 
-        void play();
+        bool play();
 };
 
 #endif

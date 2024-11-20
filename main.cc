@@ -57,5 +57,8 @@ int main(int argc, char *argv[]) {
     Board board{seed, is_seed};
 
     Game_Controller controller{Board{seed, is_seed}};
-    controller.play();
+    bool play_again = controller.play();
+    while (play_again) {  // play until user enters "no"
+        play_again = controller.play();
+    }
 }
