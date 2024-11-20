@@ -8,6 +8,12 @@ bool Player::won() const{
     return false;
 }
 
+bool Player::owns_goal(int pos) const {
+    if (owned_goal.find(pos) != owned_goal.end()) return true;
+    
+    return false;
+}
+
 std::ostream &operator<<(std::ostream &out, Player player) {
     out << player.name << " has " << player.points << " victory points, "
     << player.caffeine_count << " caffeines, " << player.lab_count << " labs, "

@@ -93,7 +93,7 @@ void Board::link_criteria() {
 
         // put this in another function maybe?
         // For each criteria, set corresponding tile to tile at earliest position
-        for (int j = 0; j < 6; j++) {
+        for (int j = 0; j < CORNERS; j++) {
             if (tiles[i]->criteria[j]->get_tile() == nullptr) {
                 tiles[i]->criteria[j]->set_tile(tiles[i]);
             }
@@ -261,8 +261,140 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
     return tiles;
 }
 
+// returns true if Player player can achieve goal pos on the board
+bool Board::can_achieve(int pos, Player player) const {
+    int position_on_tile = 0;
+    Tile *tile = all_goals[pos]->get_tile();
 
-// General functions
+    for (int i = 0; i < CORNERS; i++) {
+        if (tile->goals[i]->get_pos() == pos) {
+            position_on_tile = i;
+            break;
+        }
+    }
+
+    switch (position_on_tile) {
+        case 0:
+            return check_goal_0(tile, player);
+        case 1:
+            return check_goal_1(tile, player);
+        case 2:
+            return check_goal_2(tile, player);
+        case 3:
+            return check_goal_3(tile, player);
+        case 4:
+            return check_goal_4(tile, player);
+        case 5:
+            return check_goal_5(tile, player);
+        default:
+            // could make this a custom error
+            throw std::runtime_error("Invalid goal position.");
+    }
+}
+
+bool Board::check_goal_0(Tile *tile, Player player) const {
+    Tile *topright = tile->get_top_right();
+    Tile *topleft = tile->get_top_left();
+
+    if (topright && player.owns_goal(topright->goals[1]->get_pos())) {
+        return true;
+    }
+    else if (topleft && player.owns_goal(topleft->goals[2]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[1]->get_pos()) || player.owns_goal(tile->goals[2]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool Board::check_goal_1(Tile *tile, Player player) const {
+    Tile *top = tile->get_top();
+    Tile *botleft = tile->get_bot_left();
+
+    if (top && player.owns_goal(top->goals[3]->get_pos())) {
+        return true;
+    }
+    else if (botleft && player.owns_goal(botleft->goals[0]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[0]->get_pos()) || player.owns_goal(tile->goals[3]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool Board::check_goal_2(Tile *tile, Player player) const {
+    Tile *top = tile->get_top();
+    Tile *botright = tile->get_bot_right();
+
+    if (top && player.owns_goal(top->goals[4]->get_pos())) {
+        return true;
+    }
+    else if (botright && player.owns_goal(botright->goals[0]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[0]->get_pos()) || player.owns_goal(tile->goals[4]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool Board::check_goal_3(Tile *tile, Player player) const {
+    Tile *botleft = tile->get_bot_left();
+    Tile *topleft = tile->get_top_left();
+
+    if (topleft && player.owns_goal(botleft->goals[5]->get_pos())) {
+        return true;
+    }
+    else if (botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[1]->get_pos()) || player.owns_goal(tile->goals[5]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool Board::check_goal_4(Tile *tile, Player player) const {
+    Tile *topright = tile->get_top_right();
+    Tile *botright = tile->get_bot_right();
+
+    if (topright && player.owns_goal(topright->goals[5]->get_pos())) {
+        return true;
+    }
+    else if (botright && player.owns_goal(botright->goals[3]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[5]->get_pos()) || player.owns_goal(tile->goals[2]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool Board::check_goal_5(Tile *tile, Player player) const {
+    Tile *botright = tile->get_bot_right();
+    Tile *botleft = tile->get_bot_left();
+
+    if (botright && player.owns_goal(botright->goals[3]->get_pos())) {
+        return true;
+    }
+    else if (botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
+        return true;
+    }
+    else if (player.owns_goal(tile->goals[3]->get_pos()) || player.owns_goal(tile->goals[4]->get_pos())) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Resource functions
 
 // returns: string value of resource
 std::string ResourceToString(Resources resource) {

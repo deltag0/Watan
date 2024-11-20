@@ -20,6 +20,8 @@ class Game_Controller {
 
         string check_command(const string &command);
         string invalid_command();
+        string invalid_build();
+        string invalid_ressources();
         int roll_dice() const;
         int color_to_name(const string &color) const;
         void print_turn() const;
