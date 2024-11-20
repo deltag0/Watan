@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "game_controller.h"
+#include "player.h"
 
 using std::cout;
 using std::cin;
@@ -14,7 +15,7 @@ Game_Controller::Game_Controller(Board b): board{b},
 p_list{Player {'B', "Blue"},
         Player {'R', "Red"},
         Player {'O', "Orange"},
-        Player {'Y', "Yellow"},}, sot{true}, turn{0} {}
+        Player {'Y', "Yellow"}}, sot{true}, turn{0} {}
 
 bool Game_Controller::play() {
 
@@ -45,14 +46,14 @@ bool Game_Controller::play() {
         p_list[i].owned_criterions.insert(pos);
     }
 
+    cin.ignore();
     // main loop
     while (!game_over()) {
         string curr = "";
-        int roll;
+        int roll = 0;
 
         print_turn();
         print_status();
-        cin.ignore();
         // beginning of game commands
         while (curr != "roll") {
             cout << '>';

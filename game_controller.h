@@ -5,15 +5,19 @@
 
 using std::string;
 
-#include "board.h"
-#include "player.h"
+struct Player;
 
+#include "board.h"
+
+#define NUM_PLAYERS 4
 #define MIN_ROLL 2
 #define MAX_ROLL 12
+
 
 const string invalid_message = "Invalid command.";
 const string invalid_ressources = "You do not have enough resources";
 const string invalid_place = "You cannot build here";
+
 
 class Game_Controller {
     Board &board;
