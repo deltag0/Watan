@@ -8,11 +8,14 @@
 #include "tile.h"
 #include "criterion.h"
 #include "goal.h"
+#include "player.h"
 
 class Tile;
+class Player;
 class Goal;
 class Criterion;
 
+#define CORNERS 6
 
 // Main board class
 // Includes Tiles, Goose placement, 
@@ -21,6 +24,15 @@ class Board {
         Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
         std::vector<Tile *> initialize_tiles(std::vector<Goal *> &goals, int seed = 0, bool with_seed = false);
+        bool can_achieve(int pos, Player player) const;
+        
+        // helper functions for can_achieve() for different positions of goals
+        bool check_goal_0(Tile *tile, Player player) const;
+        bool check_goal_1(Tile *tile, Player player) const;
+        bool check_goal_2(Tile *tile, Player player) const;
+        bool check_goal_3(Tile *tile, Player player) const;
+        bool check_goal_4(Tile *tile, Player player) const;
+        bool check_goal_5(Tile *tile, Player player) const;
         
     private:
         std::vector<Goal *> all_goals;

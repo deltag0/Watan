@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 #include "board.h"
 #include "criterion.h"
@@ -11,6 +12,8 @@
 #define NUM_PLAYERS 4
 #define MIN_ROLL 2
 #define MAX_ROLL 12
+
+enum class Resources;
 
 enum class Dice {
     LOADED,
@@ -32,12 +35,14 @@ struct Player {
 
     Dice die;
     // could make these dictionaries
-    std::vector<Criterion *> owned_criterions;
-    std::vector<Goal *> owned_goal;
+    std::unordered_set<int> owned_criterions;
+    std::unordered_set<int> owned_goal;
     Player(char color, std::string name);
 
     bool won() const;
     int &find_resources(Resources ressource);
+    // returns true if player owns goal
+    bool owns_goal(int pos) const;
 };
 
 // override operator to display status of player
