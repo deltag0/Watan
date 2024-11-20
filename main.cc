@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "board.h"
+#include "game_controller.h"
 #include "criterion.h"
 #include "goal.h"
 #include "player.h"
@@ -54,63 +55,31 @@ int main(int argc, char *argv[]) {
 
 
     Board board{seed, is_seed};
-    int turn = 0;
-    int players = 4;
-
-    // our players
-    Player p_list[] = {
-        Player {'B'},
-        Player {'R'},
-        Player {'O'},
-        Player {'Y'},
-    };
+    Game_Controller controller{board};
 
     // main loop
-    while (!(p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won())) {
+    while (!controller.game_over()) {
         string curr = "";
         int roll = 0;
 
-        cout << "Student " << p_list[turn].color << "'s " << "turn" << std::endl;
-        cout << p_list[turn];
+        controller.print_turn();
+        controller.print_status();
 
         // beginning of game commands
         while (curr != "roll") {
             cout << '>';
-            cin >> curr;
+            std::getline(cin, curr);
 
-            if (curr == "load") {
-            p_list[turn].die = Dice::LOADED;
-            }
-            else if (curr == "fair") {
-            p_list[turn].die = Dice::FAIR;
-            }
-            else if (curr != "roll") {
-                cout << "Invalid command." << std::endl;
-            }
+            curr = controller.check_command(curr);
         }
 
-        if (p_list[turn].die == Dice::FAIR) {
-            std::random_device rd;
-            std::mt19937 rng(rd());
-            std::uniform_int_distribution<int> dist(2, 12);
-            roll = dist(rng);
+        roll = controller.roll_dice();
 
-            // function for handling roll
-        }
-        else {
+        while (curr != "next") {
             cout << '>';
+            std::getline(cin, curr);
 
-            while (roll > 12 || roll < 1) {
-                cin >> roll;
-
-                if (roll > 12 || roll < 1) cout << "Invalid command." << std::endl;
-            }
-
+            curr = controller.check_command(curr);
         }
-
-        turn++;
-        if (turn == players) turn = 0;
     }
-    
-
 }

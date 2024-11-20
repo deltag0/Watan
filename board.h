@@ -51,4 +51,6 @@ enum class Resources {
 // convert class name to string valued name
 std::string ResourceToString(Resources resource);
 
+Resources StringToResource(const std::string &resource);
+
 #endif

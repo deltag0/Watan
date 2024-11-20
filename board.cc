@@ -278,3 +278,21 @@ std::string ResourceToString(Resources resource) {
             throw std::invalid_argument("Invalid Resources value");
     }
 }
+
+Resources StringToResource(const std::string& resource) {
+    if (resource == "CAFFEINE") {
+        return Resources::CAFFEINE;
+    } else if (resource == "LAB") {
+        return Resources::LAB;
+    } else if (resource == "LECTURE") {
+        return Resources::LECTURE;
+    } else if (resource == "STUDY") {
+        return Resources::STUDY;
+    } else if (resource == "TUTORIAL") {
+        return Resources::TUTORIAL;
+    } else if (resource == "NETFLIX") {
+        return Resources::NETFLIX;
+    } else {
+        throw std::invalid_argument("Invalid resource string");
+    }
+}
