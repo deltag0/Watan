@@ -25,7 +25,7 @@ bool Game_Controller::play() {
         print_turn();
         print_status();
 
-        // beginning of game commands
+        // beginning of turn commands
         while (curr != "roll") {
             cout << '>';
             std::getline(cin, curr);
@@ -102,10 +102,10 @@ string Game_Controller::check_command(const string &command) {
     else if (first == "achieve") {
         int pos;
         
-        if (!(cin >> pos)) {
+        if (!(iss >> pos)) {
             return invalid_command();
         }
-
+        
         bool can_achieve = board.can_achieve(pos, p_list[turn]);
 
         if (!can_achieve) {
@@ -113,7 +113,7 @@ string Game_Controller::check_command(const string &command) {
         }
 
         if (p_list[turn].study_count == 0 || p_list[turn].tutorial_count == 0) {
-            return invalid_ressources();
+            return invalid_resources();
         }
 
         p_list[turn].study_count--;
@@ -122,30 +122,35 @@ string Game_Controller::check_command(const string &command) {
         p_list[turn].owned_goal.insert(pos);
     }
     else if (first == "complete") {
-        // try to complete current criterion
+        
     }
     else if (first == "improve") {
         // try to improve criteria at criteria #
     }
     else if (first == "trade") {
         string ans;
-        string partner = "";
-        string give_resource = "";
-        string desired_resource = "";
-        iss >> partner >> give_resource >> desired_resource;
-
+        string partner;
+        string give_resource;
+        string take_resource;
+        if (!(iss >> partner >> give_resource >> take_resource) 
+        || !is_color(partner) 
+        || partner == p_list[turn].name
+        || !is_resource(give_resource) 
+        || !is_resource(take_resource)) {
+            return invalid_command();
+        }
+        
         Resources resource1 = StringToResource(give_resource);
         int &resource1_count = p_list[turn].find_resources(resource1);
 
         if (resource1_count == 0) {
-            resource_error();
-            return first;
+            return invalid_resources();
         }
 
-        Resources resource2 = StringToResource(desired_resource);
+        Resources resource2 = StringToResource(take_resource);
 
         cout << p_list[turn].name << " offers " << partner << " one " << " give_resource "
-        << " for one " << desired_resource << ".\n" << "Does " << partner << " accept this offer?" << '\n';\
+        << " for one " << take_resource << ".\n" << "Does " << partner << " accept this offer?" << '\n';\
 
         cin >> ans;
 
@@ -190,39 +195,21 @@ bool Game_Controller::game_over() const {
     return p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won();
 }
 
-void Game_Controller::print_status() const {cout << p_list[turn];}
+void Game_Controller::print_status() const {p_list[turn].print();}
 
-string Game_Controller::invalid_command() {
-    string new_command = "";
-
-    cout << "Invalid command." << '\n';
-    cout << '>';
-
-    std::getline(cin, new_command);
-
-    return check_command(new_command);
+string Game_Controller::invalid_command() const {
+    cout << "Invalid command." << std::endl;
+    return "invalid_command";
 }
 
-string Game_Controller::invalid_build() {
-    string new_command = "";
-
-    cout << "You cannot build here." << '\n';
-    cout << '>';
-
-    std::getline(cin, new_command);
-
-    return check_command(new_command);
+string Game_Controller::invalid_build() const {
+    cout << "You cannot build here." << std::endl;
+    return "invalid_build";
 }
 
-string Game_Controller::invalid_ressources() {
-    string new_command = "";
-
-    cout << "You do not have enough resources." << '\n';
-    cout << '>';
-
-    std::getline(cin, new_command);
-
-    return check_command(new_command);
+string Game_Controller::invalid_resources() const {
+    cout << "You do not have enough resources." << std::endl;
+    return "invalid_resources";
 }
 
 int Game_Controller::roll_dice() const {
@@ -268,4 +255,10 @@ int Game_Controller::color_to_name(const string &color) const {
     }
 }
 
-void Game_Controller::resource_error() const {cout <<  "You do not have enough resources.\n";}
+bool Game_Controller::is_color(string &s) const {
+    return s == "Blue" || s == "Red" || s == "Orange" || s == "Yellow";
+}
+
+bool Game_Controller::is_resource(string &s) const {
+    return s == "CAFFEINE" || s == "LAB" || s == "LECTURE" || s == "STUDY" || s == "TUTORIAL";
+}

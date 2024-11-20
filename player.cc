@@ -14,13 +14,11 @@ bool Player::owns_goal(int pos) const {
     return false;
 }
 
-std::ostream &operator<<(std::ostream &out, Player player) {
-    out << player.name << " has " << player.points << " victory points, "
-    << player.caffeine_count << " caffeines, " << player.lab_count << " labs, "
-    << player.lecture_count << " lectures, " << player.tutorial_count << " tutorials, "
-    << "and " << player.study_count << " studies." << '\n';
-
-    return out;
+void Player::print() const {
+    std::cout << name << " has " << points << " victory points, "
+    << caffeine_count << " caffeines, " << lab_count << " labs, "
+    << lecture_count << " lectures, " << tutorial_count << " tutorials, "
+    << "and " << study_count << " studies." << '\n';
 }
 
 int &Player::find_resources(Resources ressource) {

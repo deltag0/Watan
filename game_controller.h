@@ -19,9 +19,9 @@ class Game_Controller {
         Game_Controller(Board b);
 
         string check_command(const string &command);
-        string invalid_command();
-        string invalid_build();
-        string invalid_ressources();
+        string invalid_command() const;
+        string invalid_build() const;
+        string invalid_resources() const;
         int roll_dice() const;
         int color_to_name(const string &color) const;
         void print_turn() const;
@@ -29,8 +29,8 @@ class Game_Controller {
         bool game_over() const;
         void remove_resource(const Resources name, const int player);
         void add_resource(const Resources name, const int player);
-        void resource_error() const;
-
+        bool is_color(string &s) const;
+        bool is_resource(string &s) const;
         bool play();
 };
 

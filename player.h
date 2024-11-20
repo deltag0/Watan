@@ -1,10 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <vector>
 #include <iostream>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "board.h"
 #include "criterion.h"
@@ -20,7 +20,7 @@ enum class Dice {
     FAIR
 };
 
-struct Player {
+class Player {
     // student color
     char color;
     std::string name;
@@ -39,13 +39,16 @@ struct Player {
     std::unordered_set<int> owned_goal;
     Player(char color, std::string name);
 
+   public:
     bool won() const;
-    int &find_resources(Resources ressource);
+    int &find_resources(Resources resource);
     // returns true if player owns goal
     bool owns_goal(int pos) const;
-};
 
-// override operator to display status of player
-std::ostream &operator<<(std::ostream &out, Player player);
+    // print status of player
+    void print() const;
+
+    friend class Game_Controller;
+};
 
 #endif
