@@ -20,24 +20,22 @@ using std::cout;
 using std::cin;
 
 int main(int argc, char *argv[]) {
-    int seed;
+    int seed = 0;
     bool is_seed = false;
     string game;
     string loaded_board;
 
     // handling CLI arguments
-    for (int i = 1; i < argc; i++) {
+    int i = 0;
+    while (i < argc) {
         string arg = argv[i];
-        string curr;
 
-        std::istringstream iss{arg};
-        iss >> curr;
-
-
-        if (curr == "-seed") {
+        if (arg == "-seed") {
+            i++;
             try
             {
-                iss >> seed;
+                string num = argv[i];
+                seed = std::stoi(num);
                 is_seed = true;
             }
             // figure out how to catch if input is greater than an integer
@@ -46,17 +44,18 @@ int main(int argc, char *argv[]) {
                 std::cerr << e.what() << '\n';
             }
         }
-        else if (curr == "-load") {
+        else if (arg == "-load") {
             // TODO
         }
-        else if (curr == "-board") {
+        else if (arg == "-board") {
             // TODO
         }
+        i++;
     }
 
     Board board{seed, is_seed};
 
-    Game_Controller controller{Board{seed, is_seed}};
+    Game_Controller controller{board};
     bool play_again = controller.play();
     while (play_again) {  // play until user enters "no"
         play_again = controller.play();

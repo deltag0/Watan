@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player(char color, std::string name): color{color}, name{name}, die{Dice::FAIR} {}
+Player::Player(char color, std::string name, int idx): color{color}, name{name}, idx{idx}, die{Dice::FAIR} {}
 
 bool Player::won() const{
     if (points == 10) return true;

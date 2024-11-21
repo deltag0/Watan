@@ -22,6 +22,7 @@ struct Player {
     // student color
     char color;
     std::string name;
+    int idx;
 
     // resources
     int points = 0;
@@ -46,7 +47,7 @@ struct Player {
     bool owns_criterion(const int pos) const;
 
     private:
-        Player(char color, std::string name);
+        Player(char color, std::string name, int idx);
 
         friend class Game_Controller;
 

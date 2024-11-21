@@ -27,7 +27,7 @@ class Game_Controller {
     int turn;
 
     public:
-        Game_Controller(Board b);
+        Game_Controller(Board &b);
 
         string check_command(const string &command);
         string invalid_command(const string &message);
@@ -36,8 +36,9 @@ class Game_Controller {
         void print_turn() const;
         void print_status() const;
         bool game_over() const;
-        void remove_resource(const Resources name, const int player);
-        void add_resource(const Resources name, const int player);
+        void check_roll(const int roll);
+        void remove_resource(const Resources name, Player &player);
+        void add_resource(const Resources name, Player &player);
 
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
@@ -45,6 +46,8 @@ class Game_Controller {
         bool is_resource(string &s) const;
 
         int get_criterion() const;
+
+        Player *get_criterion_owner(const int pos);
 
         bool play();
 };

@@ -3,22 +3,25 @@
 #include <stdexcept>
 #include <random>
 #include <algorithm>
+#include <vector>
+#include <assert.h>
+#include <map>
 
 #include "game_controller.h"
 #include "player.h"
 
 using std::cout;
+using std::vector;
 using std::cin;
 using std::string;
 
-Game_Controller::Game_Controller(Board b): board{b}, 
-p_list{Player {'B', "Blue"},
-        Player {'R', "Red"},
-        Player {'O', "Orange"},
-        Player {'Y', "Yellow"}}, sot{true}, turn{0} {}
+Game_Controller::Game_Controller(Board &b): board{b}, 
+p_list{Player {'B', "Blue", 0},
+        Player {'R', "Red", 1},
+        Player {'O', "Orange", 2},
+        Player {'Y', "Yellow", 3}}, sot{true}, turn{0} {}
 
 bool Game_Controller::play() {
-
     for (int i = 0; i < NUM_PLAYERS; i++) {
         int pos = 0;
         cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
@@ -32,6 +35,7 @@ bool Game_Controller::play() {
 
         p_list[i].owned_criterions.insert(pos);
     }
+
     for (int i = NUM_PLAYERS - 1; i >= 0; i--) {
         int pos = 0;
         cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
@@ -47,6 +51,7 @@ bool Game_Controller::play() {
     }
 
     cin.ignore();
+
     // main loop
     while (!game_over()) {
         string curr = "";
@@ -54,6 +59,7 @@ bool Game_Controller::play() {
 
         print_turn();
         print_status();
+
         // beginning of game commands
         while (curr != "roll") {
             cout << '>';
@@ -63,6 +69,8 @@ bool Game_Controller::play() {
         }
 
         roll = roll_dice();
+
+        check_roll(roll);
 
         while (curr != "next") {
             cout << '>';
@@ -224,6 +232,51 @@ bool Game_Controller::game_over() const {
     return p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won();
 }
 
+void Game_Controller::check_roll(const int roll) {
+    std::map<Resources, int[NUM_PLAYERS]> resources_gained;
+
+    for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
+                                Resources::STUDY, Resources::TUTORIAL, Resources::NETFLIX}) {
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            resources_gained[resource][i] = 0;
+        }
+    }
+
+    // TODO handle 7 roll
+    for (auto tile: board.get_tiles()) {
+        assert(tile);
+        if (tile->get_roll_val() == roll) {
+            vector<Criterion *> criterias = tile->get_criterions();
+
+            for (auto criteria: criterias) {
+                assert(criteria);
+                Player *owner = get_criterion_owner(criteria->get_pos());
+
+                if (owner) {
+                    add_resource(tile->get_resource(), *owner);
+                    resources_gained[tile->get_resource()][owner->idx]++;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        string output = "";
+        for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
+                                Resources::STUDY, Resources::TUTORIAL, Resources::NETFLIX}) {
+            int gained = resources_gained[resource][i];
+
+            if (gained > 0) {
+                output += std::to_string(gained) + " " + ResourceToString(resource) + '\n';
+            }
+        }
+        if (output != "") {
+            cout << "Student " << p_list[i].name << " gained:\n";
+            cout << output;
+        }
+    }
+}
+
 void Game_Controller::print_status() const {cout << p_list[turn];}
 
 string Game_Controller::invalid_command(const string &message) {
@@ -279,6 +332,15 @@ bool Game_Controller::is_criterion_owned(const int pos) const {
     return false;
 }
 
+Player *Game_Controller::get_criterion_owner(const int pos) {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        if (p_list[i].owns_criterion(pos)) {
+            return &(p_list[i]);
+        }
+    }
+    return nullptr;
+}
+
 bool Game_Controller::is_goal_owned(const int pos) const {
     for (int i = 0; i < NUM_PLAYERS; i++) {
         if (p_list[i].owns_goal(pos)) {
@@ -288,12 +350,50 @@ bool Game_Controller::is_goal_owned(const int pos) const {
     return false;
 }
 
-void Game_Controller::add_resource(const Resources name, int player) {
-
+void Game_Controller::add_resource(const Resources name, Player& player) {
+    switch (name) {
+        case Resources::CAFFEINE:
+            player.caffeine_count++;
+            break;
+        case Resources::LAB:
+            player.lab_count++;
+            break;
+        case Resources::LECTURE:
+            player.lecture_count++;
+            break;
+        case Resources::STUDY:
+            player.study_count++;
+            break;
+        case Resources::TUTORIAL:
+            player.tutorial_count++;
+            break;
+        default:
+            throw std::invalid_argument("Did not provide a valid resource to add");
+            break;
+    }
 }
 
-void Game_Controller::remove_resource(const Resources name, int player) {
-
+void Game_Controller::remove_resource(const Resources name, Player &player) {
+    switch (name) {
+        case Resources::CAFFEINE:
+            player.caffeine_count--;
+            break;
+        case Resources::LAB:
+            player.lab_count--;
+            break;
+        case Resources::LECTURE:
+            player.lecture_count--;
+            break;
+        case Resources::STUDY:
+            player.study_count--;
+            break;
+        case Resources::TUTORIAL:
+            player.tutorial_count--;
+            break;
+        default:
+            throw std::invalid_argument("Did not provide a valid resource to remove");
+            break;
+    }
 }
 
 int Game_Controller::color_to_name(const string &color) const {

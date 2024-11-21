@@ -24,6 +24,12 @@ class Tile {
         // gets tile roll_value
         int get_roll_val() const;
 
+        // get criterions
+        const std::vector<Criterion *> &get_criterions() const;
+
+        // get tile resource
+        Resources get_resource() const;
+
     private:
         Tile(Resources r, int pos, int roll_value, Board *board);
         Board *board;

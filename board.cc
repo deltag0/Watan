@@ -8,17 +8,19 @@
 #include "board.h"
 
 
-Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullptr) {
+Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
     // Initializing every goal
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = new Goal{i};
+        assert(all_goals[i]);
     }
     // Initializing every criterion
     for (int i = 0; i < MAX_CRITERION; i++) {
         all_criterias[i] = new Criterion{i};
+        assert(all_criterias[i]);
     }
 
-    tiles = initialize_tiles(all_goals, seed, is_seed);
+    initialize_tiles(seed, is_seed);
     link_criteria();
     link_goals();
     // for (Tile *&t : tiles) {  <-- debug_print
@@ -182,7 +184,7 @@ void Board::link_goals() {
 }
 
 // returns: vector with all tiles present in the board
-std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed, bool with_seed) {
+void Board::initialize_tiles(int seed, bool with_seed) {
 
     // Possible resources for a board
     std::vector<Resources> all_resources = 
@@ -227,11 +229,14 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
      11,
      11};
 
-    std::vector<int> randomized_idx(MAX_TILES, 0);
+    // vectors that will contain random indexes
+    std::vector<int> randomized_resource_idx(MAX_TILES, 0);
+    std::vector<int> randomized_die_idx(MAX_TILES - 1, 0);
 
-    // initialize randomized_idx array
+    // initialize randomized_idx arrays
     for (int i = 0; i < MAX_TILES; i++) {
-        randomized_idx[i] = i;
+        randomized_resource_idx[i] = i;
+        if (i != MAX_TILES - 1) randomized_die_idx[i] = i;
     }
 
     // Randomize the randomized_idx arrays by shuffling it
@@ -243,23 +248,32 @@ std::vector<Tile *> Board::initialize_tiles(std::vector<Goal *> &goals, int seed
         rng.seed(rd());
     }
 
-    std::shuffle(randomized_idx.begin(), randomized_idx.end(), rng);
+    // make indexes of vectors map to random corresponding index
+    std::shuffle(randomized_resource_idx.begin(), randomized_resource_idx.end(), rng);
+    std::shuffle(randomized_die_idx.begin(), randomized_die_idx.end(), rng);
 
-    std::vector<Tile *> tiles(MAX_TILES, nullptr);
+    // index for resources
+    int i = 0;
+    // index for dice
+    int j = 0;
 
     // Initialize tiles
-    for (int i = 0; i < MAX_TILES; i++) {
-        Resources resource = all_resources[randomized_idx[i]];
+    while (i < MAX_TILES) {
+        Resources resource = all_resources[randomized_resource_idx[i]];
+
         // if the random resource is Netflix, set the die_value to 0, indicating there is no value to get resource
-        int die_value = resource == Resources::NETFLIX ? 0 : die_values[randomized_idx[i]];
+        int die_value = resource == Resources::NETFLIX ? 0 : die_values[randomized_die_idx[j]];
 
         Tile *curr_tile = new Tile{resource, i, die_value, this};
-        if (die_value == 0) curr_tile->has_goose = true;
+        if (die_value == 0) {
+            curr_tile->has_goose = true;
+            j--;
+        }
         tiles[i] = curr_tile;
+
+        i++;
+        j++;
     }
-
-
-    return tiles;
 }
 
 // returns true if Player player can connect the goal (but doesn't verify resources)
