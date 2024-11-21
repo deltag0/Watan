@@ -22,6 +22,7 @@ p_list{Player {'B', "Blue", 0},
         Player {'Y', "Yellow", 3}}, sot{true}, turn{0} {}
 
 bool Game_Controller::play() {
+    //TODO: ADD CHECKS FOR CRITERIA NEXT TO OTHER OWNED CRITERIA
     for (int i = 0; i < NUM_PLAYERS; i++) {
         int pos = 0;
         cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
@@ -33,6 +34,7 @@ bool Game_Controller::play() {
             pos = get_criterion();
         }
 
+        board.get_criterions()[pos]->set_player(&(p_list[i]));
         p_list[i].owned_criterions.insert(pos);
     }
 
@@ -47,6 +49,7 @@ bool Game_Controller::play() {
             pos = get_criterion();
         }
         
+        board.get_criterions()[pos]->set_player(&(p_list[i]));
         p_list[i].owned_criterions.insert(pos);
     }
 
@@ -139,15 +142,15 @@ string Game_Controller::check_command(const string &command) {
     else if (first == "achieve") {
         int pos;
         
-        if (!(cin >> pos)) {
+        if (!(iss >> pos)) {
             return invalid_command(invalid_message);
         }
         
+        if (pos < 0 || pos > MAX_GOAL) return invalid_command(invalid_place);
+
         bool can_achieve = board.can_achieve(pos, p_list[turn]);
 
-        if (!can_achieve) {
-            return invalid_command(invalid_place);
-        }
+        if (!can_achieve) {return invalid_command(invalid_place);}
 
         if (p_list[turn].study_count == 0 || p_list[turn].tutorial_count == 0) {
             return invalid_command(invalid_ressources);
@@ -157,6 +160,7 @@ string Game_Controller::check_command(const string &command) {
         p_list[turn].tutorial_count--;
         
         p_list[turn].owned_goal.insert(pos);
+        board.get_goals()[pos]->set_player(&(p_list[turn]));
     }
     else if (first == "complete") {
         
@@ -165,10 +169,10 @@ string Game_Controller::check_command(const string &command) {
         // try to improve criteria at criteria #
     }
     else if (first == "trade") {
-        string ans;
-        string partner;
-        string give_resource;
-        string take_resource;
+        string ans = "";
+        string partner = "";
+        string give_resource = "";
+        string take_resource = "";
         if (!(iss >> partner >> give_resource >> take_resource) 
         || !is_color(partner) 
         || partner == p_list[turn].name
@@ -186,10 +190,18 @@ string Game_Controller::check_command(const string &command) {
 
         Resources resource2 = StringToResource(take_resource);
 
-        cout << p_list[turn].name << " offers " << partner << " one " << " give_resource "
+        cout << p_list[turn].name << " offers " << partner << " one " << give_resource
         << " for one " << take_resource << ".\n" << "Does " << partner << " accept this offer?" << '\n';\
+        
+        cout << '>';
+        std::getline(cin, ans);
 
-        cin >> ans;
+        while (ans != "yes" && ans != "no") {
+            cout << invalid_message << '\n';
+            cout << '>';
+            std::getline(cin, ans);
+        }
+        
 
         if (ans == "yes") {
             int student2 = color_to_name(partner);
@@ -234,6 +246,7 @@ bool Game_Controller::game_over() const {
 
 void Game_Controller::check_roll(const int roll) {
     std::map<Resources, int[NUM_PLAYERS]> resources_gained;
+    bool gained = false;
 
     for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
                                 Resources::STUDY, Resources::TUTORIAL, Resources::NETFLIX}) {
@@ -253,6 +266,7 @@ void Game_Controller::check_roll(const int roll) {
                 Player *owner = get_criterion_owner(criteria->get_pos());
 
                 if (owner) {
+                    gained = true;
                     add_resource(tile->get_resource(), *owner);
                     resources_gained[tile->get_resource()][owner->idx]++;
                 }
@@ -274,6 +288,10 @@ void Game_Controller::check_roll(const int roll) {
             cout << "Student " << p_list[i].name << " gained:\n";
             cout << output;
         }
+    }
+
+    if (!gained) {
+        cout << "No students gained resources.\n";
     }
 }
 

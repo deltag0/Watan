@@ -23,6 +23,8 @@ class Board {
     public:
         Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
+        const std::vector<Goal *> &get_goals() const;
+        const std::vector<Criterion *> &get_criterions() const;
         void initialize_tiles(int seed = 0, bool with_seed = false);
         bool can_achieve(int pos, Player player) const;
         

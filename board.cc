@@ -41,9 +41,11 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
     // }
 }
 
-const std::vector<Tile *> &Board::get_tiles() const{
-    return tiles;
-}
+const std::vector<Tile *> &Board::get_tiles() const{ return tiles;}
+
+const std::vector<Goal *> &Board::get_goals() const {return all_goals;}
+
+const std::vector<Criterion *> &Board::get_criterions() const {return all_criterias;}
 
 void Board::link_criteria() {
     int curr = 0;
@@ -278,6 +280,10 @@ void Board::initialize_tiles(int seed, bool with_seed) {
 
 // returns true if Player player can connect the goal (but doesn't verify resources)
 bool Board::can_achieve(int pos, Player player) const {
+    if (all_goals[pos]->get_player() != nullptr) {
+        return false;
+    }
+
     int position_on_tile = 0;
     Tile *tile = all_goals[pos]->get_tile();
 
@@ -288,10 +294,14 @@ bool Board::can_achieve(int pos, Player player) const {
         }
     }
 
+
     assert(position_on_tile >= 0 && position_on_tile < 6);
 
-    if ((position_on_tile < 5 && (player.owns_criterion(position_on_tile - 1) || player.owns_criterion(position_on_tile + 1)))
-    || (position_on_tile == 5 && (player.owns_criterion(4) || player.owns_criterion(5))))
+
+    if ((position_on_tile == 5 && (player.owns_criterion(tile->get_criterions()[4]->get_pos()) || player.owns_criterion(tile->get_criterions()[5]->get_pos()))) ||
+    (position_on_tile == 0 && (player.owns_criterion(tile->get_criterions()[0]->get_pos()) || player.owns_criterion(tile->get_criterions()[1]->get_pos()))) ||
+    ((position_on_tile != 0 && position_on_tile != 5) &&
+    (player.owns_criterion(tile->get_criterions()[position_on_tile - 1]->get_pos()) || player.owns_criterion(tile->get_criterions()[position_on_tile + 1]->get_pos()))))
     {
         return true;
     }
@@ -319,13 +329,16 @@ bool Board::check_goal_0(Tile *tile, Player player) const {
     Tile *topright = tile->get_top_right();
     Tile *topleft = tile->get_top_left();
 
-    if (topright && player.owns_goal(topright->goals[1]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[1]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[0]->in_the_way(&player);
+
+    if (!in_the_way_right && topright && player.owns_goal(topright->goals[1]->get_pos())) {
         return true;
     }
-    else if (topleft && player.owns_goal(topleft->goals[2]->get_pos())) {
+    else if (!in_the_way_left && topleft && player.owns_goal(topleft->goals[2]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[1]->get_pos()) || player.owns_goal(tile->goals[2]->get_pos())) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[2]->get_pos()))) {
         return true;
     }
     
@@ -336,13 +349,16 @@ bool Board::check_goal_1(Tile *tile, Player player) const {
     Tile *top = tile->get_top();
     Tile *botleft = tile->get_bot_left();
 
-    if (top && player.owns_goal(top->goals[3]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[0]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[2]->in_the_way(&player);
+
+    if (!in_the_way_right && top && player.owns_goal(top->goals[3]->get_pos())) {
         return true;
     }
-    else if (botleft && player.owns_goal(botleft->goals[0]->get_pos())) {
+    else if (!in_the_way_left && botleft && player.owns_goal(botleft->goals[0]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[0]->get_pos()) || player.owns_goal(tile->goals[3]->get_pos())) {
+    else if ((!in_the_way_right && player.owns_goal(tile->goals[0]->get_pos())) || (!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos()))) {
         return true;
     }
     
@@ -353,13 +369,16 @@ bool Board::check_goal_2(Tile *tile, Player player) const {
     Tile *top = tile->get_top();
     Tile *botright = tile->get_bot_right();
 
-    if (top && player.owns_goal(top->goals[4]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[3]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[1]->in_the_way(&player);
+
+    if (!in_the_way_left && top && player.owns_goal(top->goals[4]->get_pos())) {
         return true;
     }
-    else if (botright && player.owns_goal(botright->goals[0]->get_pos())) {
+    else if (!in_the_way_right && botright && player.owns_goal(botright->goals[0]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[0]->get_pos()) || player.owns_goal(tile->goals[4]->get_pos())) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[0]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
         return true;
     }
     
@@ -370,13 +389,16 @@ bool Board::check_goal_3(Tile *tile, Player player) const {
     Tile *botleft = tile->get_bot_left();
     Tile *topleft = tile->get_top_left();
 
-    if (topleft && player.owns_goal(botleft->goals[5]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[4]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[2]->in_the_way(&player);
+
+    if (!in_the_way_left && topleft && player.owns_goal(topleft->goals[5]->get_pos())) {
         return true;
     }
-    else if (botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
+    else if (!in_the_way_right && botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[1]->get_pos()) || player.owns_goal(tile->goals[5]->get_pos())) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[5]->get_pos()))) {
         return true;
     }
     
@@ -387,10 +409,13 @@ bool Board::check_goal_4(Tile *tile, Player player) const {
     Tile *topright = tile->get_top_right();
     Tile *botright = tile->get_bot_right();
 
-    if (topright && player.owns_goal(topright->goals[5]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[3]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[4]->in_the_way(&player);
+
+    if (!in_the_way_right && topright && player.owns_goal(topright->goals[5]->get_pos())) {
         return true;
     }
-    else if (botright && player.owns_goal(botright->goals[3]->get_pos())) {
+    else if (!in_the_way_left && botright && player.owns_goal(botright->goals[3]->get_pos())) {
         return true;
     }
     else if (player.owns_goal(tile->goals[5]->get_pos()) || player.owns_goal(tile->goals[2]->get_pos())) {
@@ -404,13 +429,16 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     Tile *botright = tile->get_bot_right();
     Tile *botleft = tile->get_bot_left();
 
-    if (botright && player.owns_goal(botright->goals[3]->get_pos())) {
+    bool in_the_way_right = tile->get_criterions()[4]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criterions()[5]->in_the_way(&player);
+
+    if (!in_the_way_right && botright && player.owns_goal(botright->goals[3]->get_pos())) {
         return true;
     }
-    else if (botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
+    else if (!in_the_way_left && botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[3]->get_pos()) || player.owns_goal(tile->goals[4]->get_pos())) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
         return true;
     }
     

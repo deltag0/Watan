@@ -25,12 +25,12 @@ struct Player {
     int idx;
 
     // resources
-    int points = 0;
-    int caffeine_count = 0;
-    int lab_count = 0;
-    int lecture_count = 0;
-    int study_count = 0;
-    int tutorial_count = 0;
+    int points = 100;
+    int caffeine_count = 100;
+    int lab_count = 100;
+    int lecture_count = 100;
+    int study_count = 100;
+    int tutorial_count = 100;
 
     Dice die;
     // could make these dictionaries

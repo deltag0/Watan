@@ -18,9 +18,11 @@ class Criterion : public Asset {
         Criterion(int pos);
         ~Criterion() = default;
 
-        // could make Board a friend of criterion, but it's alright
         void set_tile(Tile *t);
         Tile *get_tile();
+
+        // returns false if the Criterion is owned by player or if the Criterion is not owned yet
+        bool in_the_way(const Player *player) const;
 };
 
 
