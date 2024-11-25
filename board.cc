@@ -268,6 +268,7 @@ void Board::initialize_tiles(int seed, bool with_seed) {
 
         Tile *curr_tile = new Tile{resource, i, die_value, this};
         if (die_value == 0) {
+            goose_tile = curr_tile;
             curr_tile->has_goose = true;
             j--;
         }
@@ -338,7 +339,8 @@ bool Board::check_goal_0(Tile *tile, Player player) const {
     else if (!in_the_way_left && topleft && player.owns_goal(topleft->goals[2]->get_pos())) {
         return true;
     }
-    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[2]->get_pos()))) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) 
+            || (!in_the_way_right && player.owns_goal(tile->goals[2]->get_pos()))) {
         return true;
     }
     
@@ -358,7 +360,8 @@ bool Board::check_goal_1(Tile *tile, Player player) const {
     else if (!in_the_way_left && botleft && player.owns_goal(botleft->goals[0]->get_pos())) {
         return true;
     }
-    else if ((!in_the_way_right && player.owns_goal(tile->goals[0]->get_pos())) || (!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos()))) {
+    else if ((!in_the_way_right && player.owns_goal(tile->goals[0]->get_pos())) 
+        || (!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos()))) {
         return true;
     }
     
@@ -378,7 +381,8 @@ bool Board::check_goal_2(Tile *tile, Player player) const {
     else if (!in_the_way_right && botright && player.owns_goal(botright->goals[0]->get_pos())) {
         return true;
     }
-    else if ((!in_the_way_left && player.owns_goal(tile->goals[0]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[0]->get_pos())) 
+            || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
         return true;
     }
     
@@ -398,7 +402,8 @@ bool Board::check_goal_3(Tile *tile, Player player) const {
     else if (!in_the_way_right && botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
         return true;
     }
-    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[5]->get_pos()))) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[1]->get_pos())) 
+            || (!in_the_way_right && player.owns_goal(tile->goals[5]->get_pos()))) {
         return true;
     }
     
@@ -410,7 +415,7 @@ bool Board::check_goal_4(Tile *tile, Player player) const {
     Tile *botright = tile->get_bot_right();
 
     bool in_the_way_right = tile->get_criteria()[3]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criteria()[4]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[5]->in_the_way(&player);
 
     if (!in_the_way_right && topright && player.owns_goal(topright->goals[5]->get_pos())) {
         return true;
@@ -418,7 +423,8 @@ bool Board::check_goal_4(Tile *tile, Player player) const {
     else if (!in_the_way_left && botright && player.owns_goal(botright->goals[3]->get_pos())) {
         return true;
     }
-    else if (player.owns_goal(tile->goals[5]->get_pos()) || player.owns_goal(tile->goals[2]->get_pos())) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[5]->get_pos())) 
+            || (!in_the_way_right && player.owns_goal(tile->goals[2]->get_pos()))) {
         return true;
     }
     
@@ -438,7 +444,8 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     else if (!in_the_way_left && botleft && player.owns_goal(botleft->goals[4]->get_pos())) {
         return true;
     }
-    else if ((!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos())) || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
+    else if ((!in_the_way_left && player.owns_goal(tile->goals[3]->get_pos())) 
+            || (!in_the_way_right && player.owns_goal(tile->goals[4]->get_pos()))) {
         return true;
     }
     
@@ -483,4 +490,13 @@ Resources StringToResource(const std::string& resource) {
     } else {
         throw std::invalid_argument("Invalid resource string");
     }
+}
+
+const Tile *Board::get_goose() const {return goose_tile;}
+
+void Board::set_goose(Tile *tile) {
+    assert(goose_tile);
+    goose_tile->has_goose = false;
+    goose_tile = tile;
+    tile->has_goose = true;
 }

@@ -36,6 +36,9 @@ class Board {
         bool check_goal_4(Tile *tile, Player player) const;
         bool check_goal_5(Tile *tile, Player player) const;
         
+        const Tile *get_goose() const;
+        void set_goose(Tile *tile);
+
     private:
         std::vector<Goal *> all_goals;
         std::vector<Criterion *>all_criteria;

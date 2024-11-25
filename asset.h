@@ -12,8 +12,8 @@ class Asset {
     protected:
         int pos;
         std::string display; // value displayed on the board for the asset
-        Tile *tile; // which tile the asset is on
-        Player *owner; // player who owns the asset
+        Tile *tile; // which tile the asset is on (always initialized)
+        Player *owner; // player who owns the asset (nullptr if none)
 
     public:
         Asset(int pos);

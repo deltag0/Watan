@@ -18,7 +18,7 @@ struct Player;
 const string invalid_message = "Invalid command.";
 const string invalid_resources = "You do not have enough resources";
 const string invalid_place = "You cannot build here";
-
+const string invalid_student = "Not a valid student";
 
 class Game_Controller {
     Board &board;
@@ -32,28 +32,36 @@ class Game_Controller {
 
         string check_command(const string &command);
         string invalid_command(const string &message);
+
         int roll_dice() const;
+
+        // returns the index of the player based on their color
         int color_to_name(const string &color) const;
+
         void print_turn() const;
         void print_status() const;
+
         bool game_over() const;
         void check_roll(const int roll);
+
         void remove_resource(const Resources name, Player &player);
         void add_resource(const Resources name, Player &player);
+
         void move_geese();
         void resources_7();
         void remove_random(const int resources_lost, Player &player, std::map<Resources, int> &lost);
+        void steal(int location);
+        void steal_output(int loser, Resources resource) const;
 
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
         bool is_color(string &s) const;
         bool is_resource(string &s) const;
 
+        int get_total_resources(const int player_idx) const;
         int get_criterion() const;
-        int get_tile() const;
 
         Player *get_criterion_owner(const int pos);
-
         bool can_complete(const int pos) const;
 
         bool play();

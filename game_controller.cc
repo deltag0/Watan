@@ -669,9 +669,15 @@ void Game_Controller::move_geese() {
     resources_7();
 
     cout << "Choose where to place the GEESE.\n";
-    int location = -1;
+    int location = 0;
     string line = "";
     cout << '>';
+
+    for (int i = 0; i < MAX_TILES; i++) {
+        assert(board.get_tiles()[i]);
+    }
+
+    cin >> location;
 
     while ((!cin >> location) || location < 0 || location > 18 || (board.get_tiles()[location])->has_goose) {
         cout << invalid_message << '\n';
@@ -682,12 +688,13 @@ void Game_Controller::move_geese() {
         }
     }
 
+    board.set_goose(board.get_tiles()[location]);
+    steal(location);
 }
 
-// TOTEST
 void Game_Controller::resources_7() {
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        int total_resources = p_list[i].caffeine_count + p_list[i].lab_count + p_list[i].lecture_count + p_list[i].study_count + p_list[i].tutorial_count;
+        int total_resources = get_total_resources(i);
         std::map<Resources, int> resources_lost;
 
         if (total_resources >= 10) {
@@ -743,4 +750,108 @@ void Game_Controller::remove_random(const int resources_lost, Player &player, st
 
         i++;
     }
+}
+
+void Game_Controller::steal(int location) {
+    const std::vector<Criterion *> criterions = board.get_tiles()[location]->get_criteria();
+
+    string student_to_steal = "";
+    int players_on_map[NUM_PLAYERS]{0};
+    int last_student = -1;
+
+    #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+
+    for (auto criterion: criterions) {
+        if (criterion->get_player() != nullptr) {
+            int idx = criterion->get_player()->idx;
+            int total_resources = get_total_resources(idx);
+
+            if (total_resources > 0) {
+                players_on_map[idx] += 1;
+                last_student = MAX(last_student, idx);
+            }
+        }
+    }
+
+    if (last_student == -1) {
+        cout << "Student " << p_list[turn] << " has no students to steal from.\n";
+        return;
+    }
+
+    cout << "Student " << p_list[turn].name << " can choose to steal from ";
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        if (players_on_map[i] > 0) {
+            cout << p_list[i].name;
+            if (i != last_student) {
+                cout << ", ";
+            }
+        }
+    }
+
+    cout << ".\n";
+
+
+    cout << "Choose a student to steal from.\n";
+    cout << '>';
+
+    while (!(cin >> student_to_steal) || !is_color(student_to_steal) 
+            || players_on_map[color_to_name(student_to_steal)] == 0) {
+        cout << invalid_student << '\n';
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    Resources stolen;
+    int idx = color_to_name(student_to_steal);
+    double total = static_cast<double>(get_total_resources(idx));
+
+
+    // distribution to generate numbers between 0 and 1 so that we can choose a resource to steal
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+    double prob_caffeine = p_list[idx].caffeine_count / total;
+    double prob_lab = p_list[idx].lab_count / total + prob_caffeine;
+    double prob_lecture = p_list[idx].lecture_count / total + prob_lab;
+    double prob_study = p_list[idx].study_count / total + prob_lecture;
+
+    double rand = dis(gen);
+
+    if (rand <= prob_caffeine) {
+        p_list[turn].caffeine_count += 1;
+        p_list[idx].caffeine_count -= 1;
+        stolen = Resources::CAFFEINE;
+    }
+    else if (rand <= prob_lab) {
+        p_list[turn].lab_count += 1;
+        p_list[idx].lab_count -= 1;
+        stolen = Resources::LAB;
+    }
+    else if (rand <= prob_lecture) {
+        p_list[turn].lecture_count += 1;
+        p_list[idx].lecture_count -= 1;
+        stolen = Resources::LECTURE;
+    }
+    else if (rand <= prob_study) {
+        p_list[turn].study_count += 1;
+        p_list[idx].study_count -= 1;
+        stolen = Resources::STUDY;
+    }
+    else {
+        p_list[turn].tutorial_count += 1;
+        p_list[idx].tutorial_count -= 1;
+        stolen = Resources::TUTORIAL;
+    }
+
+    steal_output(idx, stolen);
+}
+
+void Game_Controller::steal_output(int loser, Resources resource) const {
+    cout << "Student " << p_list[turn].name << " steals " << ResourceToString(resource) << " from student " << p_list[loser].name << ".\n";
+}
+
+int Game_Controller::get_total_resources(const int player_idx) const {
+    return p_list[player_idx].caffeine_count + p_list[player_idx].lab_count + p_list[player_idx].lecture_count + p_list[player_idx].study_count + p_list[player_idx].tutorial_count;
 }
