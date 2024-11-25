@@ -2,6 +2,7 @@
 #define GAME_CONTROLLER_H
 
 #include <string>
+#include <map>
 
 using std::string;
 
@@ -39,6 +40,9 @@ class Game_Controller {
         void check_roll(const int roll);
         void remove_resource(const Resources name, Player &player);
         void add_resource(const Resources name, Player &player);
+        void move_geese();
+        void resources_7();
+        void remove_random(const int resources_lost, Player &player, std::map<Resources, int> &lost);
 
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
@@ -46,6 +50,7 @@ class Game_Controller {
         bool is_resource(string &s) const;
 
         int get_criterion() const;
+        int get_tile() const;
 
         Player *get_criterion_owner(const int pos);
 

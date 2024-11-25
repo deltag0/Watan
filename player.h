@@ -25,15 +25,15 @@ struct Player {
     int idx;
 
     // resources
-    int points = 100;
-    int caffeine_count = 100;
-    int lab_count = 100;
-    int lecture_count = 100;
-    int study_count = 100;
-    int tutorial_count = 100;
+    int points = 20;
+    int caffeine_count = 20;
+    int lab_count = 20;
+    int lecture_count = 20;
+    int study_count = 20;
+    int tutorial_count = 20;
 
     Dice die;
-    // could make these dictionaries
+
     std::unordered_set<int> owned_criterions;
     std::unordered_set<int> owned_goal;
 

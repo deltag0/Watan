@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include <assert.h>
-#include <map>
+#include <numeric>
 
 #include "game_controller.h"
 #include "player.h"
@@ -53,7 +53,8 @@ bool Game_Controller::play() {
         p_list[i].owned_criterions.insert(pos);
     }
 
-    cin.ignore();
+    cin.clear();
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     // main loop
     while (!game_over()) {
@@ -74,6 +75,9 @@ bool Game_Controller::play() {
         roll = roll_dice();
 
         check_roll(roll);
+
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         while (curr != "next") {
             cout << '>';
@@ -143,6 +147,8 @@ string Game_Controller::check_command(const string &command) {
         int pos;
         
         if (!(iss >> pos)) {
+            iss.clear();
+            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             return invalid_command(invalid_message);
         }
         
@@ -255,7 +261,11 @@ void Game_Controller::check_roll(const int roll) {
         }
     }
 
-    // TODO handle 7 roll
+    if (roll == 7) {
+        move_geese();
+        return;
+    }
+
     for (auto tile: board.get_tiles()) {
         assert(tile);
         if (tile->get_roll_val() == roll) {
@@ -324,7 +334,7 @@ int Game_Controller::roll_dice() const {
 
             if (roll > MAX_ROLL || roll < MIN_ROLL) cout << "Invalid roll." << std::endl;
         }
-        cin.ignore();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return roll;
     }
 }
@@ -335,6 +345,8 @@ int Game_Controller::get_criterion() const {
     cout << '>';
     if (!(cin >> pos) || pos < 0 || pos > MAX_CRITERION - 1) {
         cout << "You cannot build here.\n";
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return get_criterion();
     }
 
@@ -434,4 +446,84 @@ bool Game_Controller::is_color(string &s) const {
 
 bool Game_Controller::is_resource(string &s) const {
     return s == "CAFFEINE" || s == "LAB" || s == "LECTURE" || s == "STUDY" || s == "TUTORIAL";
+}
+
+void Game_Controller::move_geese() {
+    resources_7();
+
+    cout << "Choose where to place the GEESE.\n";
+    int location = -1;
+    string line = "";
+    cout << '>';
+
+    while ((!cin >> location) || location < 0 || location > 18 || (board.get_tiles()[location])->has_goose) {
+        cout << invalid_message << '\n';
+        cout << '>';
+        if (!(cin >> location)) {
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+
+}
+
+// TOTEST
+void Game_Controller::resources_7() {
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        int total_resources = p_list[i].caffeine_count + p_list[i].lab_count + p_list[i].lecture_count + p_list[i].study_count + p_list[i].tutorial_count;
+        std::map<Resources, int> resources_lost;
+
+        if (total_resources >= 10) {
+            remove_random(total_resources / 2, p_list[i], resources_lost);
+
+            cout << "Student " << p_list[i].name << " loses " << total_resources / 2 << " resources to the geese. They lose:\n"; 
+
+            for (auto const &[resource, count]: resources_lost) {
+                if (count != 0) {
+                    std::cout << count << " " << ResourceToString(resource) << '\n';
+                }
+            }
+        }
+    }
+}
+
+void Game_Controller::remove_random(const int resources_lost, Player &player, std::map<Resources, int> &lost) {
+    int i = 0;
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> dist(1, 5);
+
+    while (i < resources_lost) {
+        int to_remove = dist(rng);
+        switch(to_remove) {
+            case 1:
+                if (player.caffeine_count == 0) continue;
+                lost[Resources::CAFFEINE] += 1;
+                player.caffeine_count--;
+                break;
+            case 2:
+                if (player.lab_count == 0) continue;
+                lost[Resources::LAB] += 1;
+                player.lab_count--;
+                break;
+            case 3:
+                if (player.lecture_count == 0) continue;
+                lost[Resources::LECTURE] += 1;
+                player.lecture_count--;
+                break;
+            case 4:
+                if (player.study_count == 0) continue;
+                lost[Resources::STUDY] += 1;
+                player.study_count--;
+                break;
+            case 5:
+                if (player.tutorial_count == 0) continue;
+                lost[Resources::TUTORIAL] += 1;
+                player.tutorial_count--;
+                break;
+        }
+
+        i++;
+    }
 }
