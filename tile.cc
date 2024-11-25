@@ -9,9 +9,11 @@ int Tile::get_pos() const {return pos;}
 
 int Tile::get_roll_val() const {return roll_value;}
 
-const std::vector<Criterion *> &Tile::get_criterions() const {return criteria;}
+const std::vector<Criterion *> &Tile::get_criteria() const {return criteria;}
 
-Tile* Tile::get_under() const {
+const std::vector<Goal *> &Tile::get_goals() const {return goals;}
+
+Tile* Tile::get_bot() const {
     const std::vector<Tile *> &tiles = board->get_tiles();
     if (pos == 13 || pos == 16 || pos == 18 || pos == 17 || pos == 15) return nullptr;
 

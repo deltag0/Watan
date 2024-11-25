@@ -19,7 +19,10 @@ class Criterion : public Asset {
         ~Criterion() = default;
 
         void set_tile(Tile *t);
-        Tile *get_tile();
+        Tile *get_tile() const;
+
+        void increase_level();
+        int get_level() const;
 
         // returns false if the Criterion is owned by player or if the Criterion is not owned yet
         bool in_the_way(const Player *player) const;
