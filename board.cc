@@ -8,7 +8,7 @@
 #include "board.h"
 
 
-Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criterias(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
+Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
     // Initializing every goal
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = new Goal{i};
@@ -16,8 +16,8 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
     }
     // Initializing every criterion
     for (int i = 0; i < MAX_CRITERION; i++) {
-        all_criterias[i] = new Criterion{i};
-        assert(all_criterias[i]);
+        all_criteria[i] = new Criterion{i};
+        assert(all_criteria[i]);
     }
 
     initialize_tiles(seed, is_seed);
@@ -45,7 +45,7 @@ const std::vector<Tile *> &Board::get_tiles() const{ return tiles;}
 
 const std::vector<Goal *> &Board::get_goals() const {return all_goals;}
 
-const std::vector<Criterion *> &Board::get_criterions() const {return all_criterias;}
+const std::vector<Criterion *> &Board::get_criteria() const {return all_criteria;}
 
 void Board::link_criteria() {
     int curr = 0;
@@ -53,47 +53,47 @@ void Board::link_criteria() {
     // set up criteriions
     for (int i = 0; i < MAX_TILES; i++) {
         if (i == 0) {
-            tiles[i]->criteria[2] = all_criterias[3];
-            tiles[i]->criteria[3] = all_criterias[4];
-            tiles[i]->criteria[4] = all_criterias[8];
-            tiles[i]->criteria[5] = all_criterias[9];
+            tiles[i]->criteria[2] = all_criteria[3];
+            tiles[i]->criteria[3] = all_criteria[4];
+            tiles[i]->criteria[4] = all_criteria[8];
+            tiles[i]->criteria[5] = all_criteria[9];
         }
         else if (i <= 2 || i == MAX_TILES - 1) {
-            tiles[i]->criteria[2] = all_criterias[curr + 5];
-            tiles[i]->criteria[3] = all_criterias[curr + 6];
+            tiles[i]->criteria[2] = all_criteria[curr + 5];
+            tiles[i]->criteria[3] = all_criteria[curr + 6];
 
             // bro is special
             if (i == MAX_TILES - 1) {
-                tiles[i]->criteria[4] = all_criterias[curr + 8];
-                tiles[i]->criteria[5] = all_criterias[curr + 9];
+                tiles[i]->criteria[4] = all_criteria[curr + 8];
+                tiles[i]->criteria[5] = all_criteria[curr + 9];
             }
             else {
                 // set up bottom two criteria
-                tiles[i]->criteria[4] = all_criterias[curr + 11];
-                tiles[i]->criteria[5] = all_criterias[curr + 12];
+                tiles[i]->criteria[4] = all_criteria[curr + 11];
+                tiles[i]->criteria[5] = all_criteria[curr + 12];
             }
         }
         else {  // set up most tiles. All except 0, 1, 2, 18
             // set up left and right criteria
-            tiles[i]->criteria[2] = all_criterias[curr + 6];
-            tiles[i]->criteria[3] = all_criterias[curr + 7];
+            tiles[i]->criteria[2] = all_criteria[curr + 6];
+            tiles[i]->criteria[3] = all_criteria[curr + 7];
 
             // bottom 3 tiles (16, 17, 18) are special
             if (i >= 16) {
-                tiles[i]->criteria[4] = all_criterias[curr + 11];
-                tiles[i]->criteria[5] = all_criterias[curr + 12];
+                tiles[i]->criteria[4] = all_criteria[curr + 11];
+                tiles[i]->criteria[5] = all_criteria[curr + 12];
             }
             else {
                 // set up bottom two criteria
-                tiles[i]->criteria[4] = all_criterias[curr + 12];
-                tiles[i]->criteria[5] = all_criterias[curr + 13];
+                tiles[i]->criteria[4] = all_criteria[curr + 12];
+                tiles[i]->criteria[5] = all_criteria[curr + 13];
             }
         }
 
         // set up top two criteria
-        tiles[i]->criteria[0] = all_criterias[curr];
+        tiles[i]->criteria[0] = all_criteria[curr];
         curr++;
-        tiles[i]->criteria[1] = all_criterias[curr];
+        tiles[i]->criteria[1] = all_criteria[curr];
         curr++;
 
         // put this in another function maybe?
@@ -298,10 +298,10 @@ bool Board::can_achieve(int pos, Player player) const {
     assert(position_on_tile >= 0 && position_on_tile < 6);
 
 
-    if ((position_on_tile == 5 && (player.owns_criterion(tile->get_criterions()[4]->get_pos()) || player.owns_criterion(tile->get_criterions()[5]->get_pos()))) ||
-    (position_on_tile == 0 && (player.owns_criterion(tile->get_criterions()[0]->get_pos()) || player.owns_criterion(tile->get_criterions()[1]->get_pos()))) ||
+    if ((position_on_tile == 5 && (player.owns_criterion(tile->get_criteria()[4]->get_pos()) || player.owns_criterion(tile->get_criteria()[5]->get_pos()))) ||
+    (position_on_tile == 0 && (player.owns_criterion(tile->get_criteria()[0]->get_pos()) || player.owns_criterion(tile->get_criteria()[1]->get_pos()))) ||
     ((position_on_tile != 0 && position_on_tile != 5) &&
-    (player.owns_criterion(tile->get_criterions()[position_on_tile - 1]->get_pos()) || player.owns_criterion(tile->get_criterions()[position_on_tile + 1]->get_pos()))))
+    (player.owns_criterion(tile->get_criteria()[position_on_tile - 1]->get_pos()) || player.owns_criterion(tile->get_criteria()[position_on_tile + 1]->get_pos()))))
     {
         return true;
     }
@@ -329,8 +329,8 @@ bool Board::check_goal_0(Tile *tile, Player player) const {
     Tile *topright = tile->get_top_right();
     Tile *topleft = tile->get_top_left();
 
-    bool in_the_way_right = tile->get_criterions()[1]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[0]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[1]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[0]->in_the_way(&player);
 
     if (!in_the_way_right && topright && player.owns_goal(topright->goals[1]->get_pos())) {
         return true;
@@ -349,8 +349,8 @@ bool Board::check_goal_1(Tile *tile, Player player) const {
     Tile *top = tile->get_top();
     Tile *botleft = tile->get_bot_left();
 
-    bool in_the_way_right = tile->get_criterions()[0]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[2]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[0]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[2]->in_the_way(&player);
 
     if (!in_the_way_right && top && player.owns_goal(top->goals[3]->get_pos())) {
         return true;
@@ -369,8 +369,8 @@ bool Board::check_goal_2(Tile *tile, Player player) const {
     Tile *top = tile->get_top();
     Tile *botright = tile->get_bot_right();
 
-    bool in_the_way_right = tile->get_criterions()[3]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[1]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[3]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[1]->in_the_way(&player);
 
     if (!in_the_way_left && top && player.owns_goal(top->goals[4]->get_pos())) {
         return true;
@@ -389,8 +389,8 @@ bool Board::check_goal_3(Tile *tile, Player player) const {
     Tile *botleft = tile->get_bot_left();
     Tile *topleft = tile->get_top_left();
 
-    bool in_the_way_right = tile->get_criterions()[4]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[2]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[4]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[2]->in_the_way(&player);
 
     if (!in_the_way_left && topleft && player.owns_goal(topleft->goals[5]->get_pos())) {
         return true;
@@ -409,8 +409,8 @@ bool Board::check_goal_4(Tile *tile, Player player) const {
     Tile *topright = tile->get_top_right();
     Tile *botright = tile->get_bot_right();
 
-    bool in_the_way_right = tile->get_criterions()[3]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[4]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[3]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[4]->in_the_way(&player);
 
     if (!in_the_way_right && topright && player.owns_goal(topright->goals[5]->get_pos())) {
         return true;
@@ -429,8 +429,8 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     Tile *botright = tile->get_bot_right();
     Tile *botleft = tile->get_bot_left();
 
-    bool in_the_way_right = tile->get_criterions()[4]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criterions()[5]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[4]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[5]->in_the_way(&player);
 
     if (!in_the_way_right && botright && player.owns_goal(botright->goals[3]->get_pos())) {
         return true;

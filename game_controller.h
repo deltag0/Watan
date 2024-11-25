@@ -16,7 +16,7 @@ struct Player;
 
 
 const string invalid_message = "Invalid command.";
-const string invalid_ressources = "You do not have enough resources";
+const string invalid_resources = "You do not have enough resources";
 const string invalid_place = "You cannot build here";
 
 
@@ -54,7 +54,18 @@ class Game_Controller {
 
         Player *get_criterion_owner(const int pos);
 
+        bool can_complete(const int pos) const;
+
         bool play();
+
+    private:
+        // helper functions for can_complete()
+        bool check_complete_0(const int pos) const;
+        bool check_complete_1(const int pos) const;
+        bool check_complete_2(const int pos) const;
+        bool check_complete_3(const int pos) const;
+        bool check_complete_4(const int pos) const;
+        bool check_complete_5(const int pos) const;
 };
 
 #endif

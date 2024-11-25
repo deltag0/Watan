@@ -24,7 +24,7 @@ class Board {
         Board(int seed = 0, bool is_seed = false);
         const std::vector<Tile *> &get_tiles() const;
         const std::vector<Goal *> &get_goals() const;
-        const std::vector<Criterion *> &get_criterions() const;
+        const std::vector<Criterion *> &get_criteria() const;
         void initialize_tiles(int seed = 0, bool with_seed = false);
         bool can_achieve(int pos, Player player) const;
         
@@ -38,7 +38,7 @@ class Board {
         
     private:
         std::vector<Goal *> all_goals;
-        std::vector<Criterion *>all_criterias;
+        std::vector<Criterion *>all_criteria;
         std::vector<Tile *> tiles;
         Tile *goose_tile;
 
