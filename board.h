@@ -70,4 +70,6 @@ std::string ResourceToString(Resources resource);
 
 Resources StringToResource(const std::string &resource);
 
+int ResourceToNum(Resources resource);
+
 #endif

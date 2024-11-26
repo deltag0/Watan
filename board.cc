@@ -264,10 +264,10 @@ void Board::initialize_tiles(int seed, bool with_seed) {
         Resources resource = all_resources[randomized_resource_idx[i]];
 
         // if the random resource is Netflix, set the die_value to 0, indicating there is no value to get resource
-        int die_value = resource == Resources::NETFLIX ? 0 : die_values[randomized_die_idx[j]];
+        int die_value = resource == Resources::NETFLIX ? 7 : die_values[randomized_die_idx[j]];
 
         Tile *curr_tile = new Tile{resource, i, die_value, this};
-        if (die_value == 0) {
+        if (die_value == 7) {
             goose_tile = curr_tile;
             curr_tile->has_goose = true;
             j--;
@@ -452,6 +452,15 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     return false;
 }
 
+const Tile *Board::get_goose() const {return goose_tile;}
+
+void Board::set_goose(Tile *tile) {
+    assert(goose_tile);
+    goose_tile->has_goose = false;
+    goose_tile = tile;
+    tile->has_goose = true;
+}
+
 // Resource functions
 
 // returns: string value of resource
@@ -492,11 +501,21 @@ Resources StringToResource(const std::string& resource) {
     }
 }
 
-const Tile *Board::get_goose() const {return goose_tile;}
-
-void Board::set_goose(Tile *tile) {
-    assert(goose_tile);
-    goose_tile->has_goose = false;
-    goose_tile = tile;
-    tile->has_goose = true;
+int ResourceToNum(Resources resource) {
+    switch (resource) {
+        case Resources::CAFFEINE:
+            return 0;
+        case Resources::LAB:
+            return 1;
+        case Resources::LECTURE:
+            return 2;
+        case Resources::STUDY:
+            return 3;
+        case Resources::TUTORIAL:
+            return 4;
+        case Resources::NETFLIX:
+            return 5;
+        default:
+            throw std::invalid_argument("Invalid Resources value");
+    }
 }

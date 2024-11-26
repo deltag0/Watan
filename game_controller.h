@@ -19,6 +19,8 @@ const string invalid_message = "Invalid command.";
 const string invalid_resources = "You do not have enough resources";
 const string invalid_place = "You cannot build here";
 const string invalid_student = "Not a valid student";
+const string has_goose = "Tile already has goose";
+const string invalid_tile = "Not a valid tile";
 
 class Game_Controller {
     Board &board;
@@ -53,10 +55,17 @@ class Game_Controller {
         void steal(int location);
         void steal_output(int loser, Resources resource) const;
 
+        void save_game(const string &filename) const;
+        void output_player(std::ostream &out, const int idx) const;
+        void output_board(std::ostream &out) const;
+
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
         bool is_color(string &s) const;
         bool is_resource(string &s) const;
+
+        bool tile_error(int tile);
+        bool goose_error(int tile);
 
         int get_total_resources(const int player_idx) const;
         int get_criterion() const;

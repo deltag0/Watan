@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <stdexcept>
 #include <random>
 #include <algorithm>
@@ -266,7 +267,10 @@ string Game_Controller::check_command(const string &command) {
         if (turn == NUM_PLAYERS) turn = 0;
     }
     else if (first == "save") {
-        // save the game
+        string filename = "";
+        if (!(iss >> filename)) return invalid_command(invalid_message);
+
+        save_game(filename);
     }
     else if (first == "help") {
         cout << "Valid commands:\n"
@@ -300,7 +304,7 @@ void Game_Controller::check_roll(const int roll) {
     bool gained = false;
 
     for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
-                                Resources::STUDY, Resources::TUTORIAL, Resources::NETFLIX}) {
+                                Resources::STUDY, Resources::TUTORIAL}) {
         for (int i = 0; i < NUM_PLAYERS; i++) {
             resources_gained[resource][i] = 0;
         }
@@ -332,7 +336,7 @@ void Game_Controller::check_roll(const int roll) {
     for (int i = 0; i < NUM_PLAYERS; i++) {
         string output = "";
         for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
-                                Resources::STUDY, Resources::TUTORIAL, Resources::NETFLIX}) {
+                                Resources::STUDY, Resources::TUTORIAL}) {
             int gained = resources_gained[resource][i];
 
             if (gained > 0) {
@@ -677,13 +681,16 @@ void Game_Controller::move_geese() {
         assert(board.get_tiles()[i]);
     }
  
-    while (!(cin >> location) || location < 0 || location > 18 || (board.get_tiles()[location])->has_goose) {
-        cout << invalid_message << '\n';
-        cout << '>';
-        if (!(cin >> location)) {
-            cin.clear();
-            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (!(cin >> location) || tile_error(location) || goose_error(location)) {
+        // if input went through, then specify error message
+        if (cin) {
+            if (tile_error(location)) cout << invalid_message << '\n';
+            else cout << has_goose << '\n';
         }
+
+        cout << '>';
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     board.set_goose(board.get_tiles()[location]);
@@ -708,6 +715,10 @@ void Game_Controller::resources_7() {
         }
     }
 }
+
+bool Game_Controller::tile_error(int tile) {return tile < 0 || tile > 18;}
+
+bool Game_Controller::goose_error(int tile) {return board.get_tiles()[tile]->has_goose;}
 
 void Game_Controller::remove_random(const int resources_lost, Player &player, std::map<Resources, int> &lost) {
     int i = 0;
@@ -799,6 +810,7 @@ void Game_Controller::steal(int location) {
         cout << invalid_student << '\n';
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cout << '>';
     }
 
     Resources stolen;
@@ -853,4 +865,43 @@ void Game_Controller::steal_output(int loser, Resources resource) const {
 
 int Game_Controller::get_total_resources(const int player_idx) const {
     return p_list[player_idx].caffeine_count + p_list[player_idx].lab_count + p_list[player_idx].lecture_count + p_list[player_idx].study_count + p_list[player_idx].tutorial_count;
+}
+
+void Game_Controller::save_game(const string &filename) const {
+    std::ofstream ofs{filename};
+
+    ofs << turn << '\n';
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        output_player(ofs, i);
+    }
+    output_board(ofs);
+    ofs << board.get_goose()->get_pos();
+}
+
+void Game_Controller::output_player(std::ostream &out, const int idx) const {
+    // output number of resources for player
+    out << p_list[idx].caffeine_count << ' ' << p_list[idx].lecture_count << ' '
+    << p_list[idx].study_count << ' ' << p_list[idx].tutorial_count << " g ";
+
+    // output owned goals
+    for (const auto &goal: p_list[idx].owned_goal) {
+        out << goal << ' ';
+    }
+    out << "c ";
+    // there might be an extra space at the end
+    //output owned criterions
+    for (const auto &criterion: p_list[idx].owned_criterions) {
+        out << criterion << ' ';
+    }
+    out << '\n';
+}
+
+void Game_Controller::output_board(std::ostream &out) const {
+    for (int i = 0; i < MAX_TILES; i++) {
+        int resource_val = ResourceToNum(board.get_tiles()[i]->get_resource());
+        int roll_val = board.get_tiles()[i]->get_roll_val();
+
+        out << resource_val << ' ' << roll_val << ' ';
+    }
+    out << '\n';
 }
