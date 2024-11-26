@@ -22,6 +22,8 @@ class Criterion : public Asset {
         Tile *get_tile() const;
 
         void increase_level();
+        // need this function for loading board. maybe revise increase level function
+        void set_level(int l);
         int get_level() const;
 
         // returns false if the Criterion is owned by player or if the Criterion is not owned yet

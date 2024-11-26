@@ -16,13 +16,82 @@ using std::vector;
 using std::cin;
 using std::string;
 
-Game_Controller::Game_Controller(Board &b): board{b}, 
+Game_Controller::Game_Controller(Board &b, string filename, bool load): board{b}, 
 p_list{Player {'B', "Blue", 0},
         Player {'R', "Red", 1},
         Player {'O', "Orange", 2},
-        Player {'Y', "Yellow", 3}}, sot{true}, turn{0} {}
+        Player {'Y', "Yellow", 3}}, sot{true}, turn{0} 
+        {
+            if (load) {
+                std::ifstream ifs{filename};
+                string line = "";
+
+                ifs >> turn;
+                // extra line we need to get rid of
+                std::getline(ifs, line);
+
+                for (int i = 0; i < NUM_PLAYERS; i++) {
+                    std::getline(ifs, line);
+                    load_player(line, i);
+                }
+                sot = false;
+            }
+        }
 
 bool Game_Controller::play() {
+    if (sot) {
+        start_game();
+    }
+
+    // main loop
+    while (!game_over()) {
+        string curr = "";
+
+        // could put this in a function to make it cleaner (might not be worth)
+        if (sot) {
+            int roll = 0;
+
+            print_turn();
+            print_status();
+
+            // beginning of game commands
+            while (curr != "roll") {
+                cout << '>';
+                std::getline(cin, curr);
+
+                curr = check_command(curr);
+            }
+
+            roll = roll_dice();
+
+            check_roll(roll);
+        }
+
+        while (curr != "next") {
+            cout << '>';
+            std::getline(cin, curr);
+
+            curr = check_command(curr);
+        }
+    }
+    
+    // end of game
+    string ans;
+    cout << "Would you like to play again?" << std::endl;
+    while (cin >> ans) {
+        if (ans == "yes") {
+            return true;
+        }
+        else if (ans == "no") {
+            return false;
+        }
+        else {
+            cout << "Invalid command." << std::endl;
+        }
+    }
+}
+
+void Game_Controller::start_game() {
     for (int i = 0; i < NUM_PLAYERS; i++) {
         int pos = 0;
         cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
@@ -51,51 +120,6 @@ bool Game_Controller::play() {
         
         board.get_criteria()[pos]->set_player(&(p_list[i]));
         p_list[i].owned_criterions.insert(pos);
-    }
-
-    // main loop
-    while (!game_over()) {
-        string curr = "";
-        int roll = 0;
-
-        print_turn();
-        print_status();
-
-        // beginning of game commands
-        while (curr != "roll") {
-            cout << '>';
-            std::getline(cin, curr);
-
-            curr = check_command(curr);
-        }
-
-        roll = roll_dice();
-
-        check_roll(roll);
-
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-        while (curr != "next") {
-            cout << '>';
-            std::getline(cin, curr);
-
-            curr = check_command(curr);
-        }
-    }
-    
-    // end of game
-    string ans;
-    cout << "Would you like to play again?" << std::endl;
-    while (cin >> ans) {
-        if (ans == "yes") {
-            return true;
-        }
-        else if (ans == "no") {
-            return false;
-        }
-        else {
-            cout << "Invalid command." << std::endl;
-        }
     }
 }
 
@@ -233,9 +257,9 @@ string Game_Controller::check_command(const string &command) {
         }
         
         Resources resource1 = StringToResource(give_resource);
-        int &resource1_count = p_list[turn].find_resources(resource1);
+        int &p1_give_resource = p_list[turn].find_resources(resource1);
 
-        if (resource1_count == 0) {
+        if (p1_give_resource == 0) {
             return invalid_command(invalid_resources);
         }
 
@@ -255,10 +279,15 @@ string Game_Controller::check_command(const string &command) {
         
 
         if (ans == "yes") {
+            int &p1_gain_resource = p_list[turn].find_resources(resource2);
             int student2 = color_to_name(partner);
-            int &resource2_count = p_list[student2].find_resources(resource2);
-            resource1_count--;
-            resource2_count++;
+            int &p2_give_resource = p_list[student2].find_resources(resource2);
+            int &p2_gain_resource = p_list[student2].find_resources(resource1);
+
+            p1_gain_resource++;
+            p1_give_resource--;
+            p2_gain_resource++;
+            p2_give_resource--;
         }
     }
     else if (first == "next") {
@@ -880,7 +909,7 @@ void Game_Controller::save_game(const string &filename) const {
 
 void Game_Controller::output_player(std::ostream &out, const int idx) const {
     // output number of resources for player
-    out << p_list[idx].caffeine_count << ' ' << p_list[idx].lecture_count << ' '
+    out << p_list[idx].caffeine_count << ' ' << p_list[idx].lab_count << ' ' << p_list[idx].lecture_count << ' '
     << p_list[idx].study_count << ' ' << p_list[idx].tutorial_count << " g ";
 
     // output owned goals
@@ -891,7 +920,7 @@ void Game_Controller::output_player(std::ostream &out, const int idx) const {
     // there might be an extra space at the end
     //output owned criterions
     for (const auto &criterion: p_list[idx].owned_criterions) {
-        out << criterion << ' ';
+        out << criterion << ' ' << board.get_criteria()[criterion]->get_level() + 1 << ' ';
     }
     out << '\n';
 }
@@ -904,4 +933,35 @@ void Game_Controller::output_board(std::ostream &out) const {
         out << resource_val << ' ' << roll_val << ' ';
     }
     out << '\n';
+}
+
+void Game_Controller::load_player(const string &data, int idx) {
+    std::istringstream iss{data};
+
+    Player &p = p_list[idx];
+
+    string curr = "";
+
+    iss >> p.caffeine_count >> p.lab_count >> p.lecture_count >> p.study_count
+    >> p.tutorial_count;
+
+    iss >> curr >> curr;
+
+    while (std::isdigit(curr[0])) {
+        p.owned_goal.insert(std::stoi(curr));
+        board.get_goals()[std::stoi(curr)]->set_player(&p);
+        iss >> curr;
+    }
+
+    while (iss >> curr) {
+        int curr_criterion = std::stoi(curr);
+        p.owned_criterions.insert(curr_criterion);
+        board.get_criteria()[curr_criterion]->set_player(&p);
+        iss >> curr;
+        int level = std::stoi(curr) - 1;
+
+        p.points += level + 1;
+        board.get_criteria()[curr_criterion]->set_level(level);
+    }
+
 }

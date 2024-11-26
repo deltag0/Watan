@@ -10,6 +10,8 @@ int Criterion::get_level() const {return level;}
 
 void Criterion::increase_level() {++level;}
 
+void Criterion::set_level(int l) {level = l;}
+
 bool Criterion::in_the_way(const Player *player) const {
     if (owner == nullptr || owner == player) return false;
 

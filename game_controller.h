@@ -29,7 +29,7 @@ class Game_Controller {
     int turn;
 
     public:
-        Game_Controller(Board &b);
+        Game_Controller(Board &b, string filename = "", bool load = false);
 
         string check_command(const string &command);
         string invalid_command(const string &message);
@@ -58,6 +58,8 @@ class Game_Controller {
         void output_player(std::ostream &out, const int idx) const;
         void output_board(std::ostream &out) const;
 
+        void load_player(const string &data, int idx);
+
         bool is_criterion_owned(const int pos) const;
         bool is_goal_owned(const int pos) const;
         bool is_color(string &s) const;
@@ -73,6 +75,7 @@ class Game_Controller {
         bool can_complete(const int pos) const;
 
         bool play();
+        void start_game();
 
     private:
         // helper functions for can_complete()

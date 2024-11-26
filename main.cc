@@ -24,8 +24,6 @@ int main(int argc, char *argv[]) {
     bool is_seed = false;
     string filename = "";
     bool load = false;
-    string game;
-    string loaded_board;
 
     // handling CLI arguments
     int i = 0;
@@ -73,7 +71,8 @@ int main(int argc, char *argv[]) {
 
     Board board{seed, is_seed, filename, load};
 
-    Game_Controller controller{board};
+
+    Game_Controller controller{board, filename, load};
     bool play_again = controller.play();
     while (play_again) {  // play until user enters "no"
         play_again = controller.play();

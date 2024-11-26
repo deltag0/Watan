@@ -25,7 +25,7 @@ struct Player {
     int idx;
 
     // resources
-    int points = 20;
+    int points = 0;
     int caffeine_count = 20;
     int lab_count = 20;
     int lecture_count = 20;

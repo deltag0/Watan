@@ -16,6 +16,7 @@ class Goal;
 class Criterion;
 
 #define CORNERS 6
+#define MAX_TILES 19
 
 // Main board class
 // Includes Tiles, Goose placement, 
@@ -25,8 +26,10 @@ class Board {
         const std::vector<Tile *> &get_tiles() const;
         const std::vector<Goal *> &get_goals() const;
         const std::vector<Criterion *> &get_criteria() const;
+        
         void initialize_tiles(int seed = 0, bool with_seed = false);
-        void get_board(const std::string &filename);
+        void get_board(const std::string &filename, int line_num);
+
         bool can_achieve(int pos, Player player) const;
         
         // helper functions for can_achieve() for different positions of goals
@@ -52,8 +55,6 @@ class Board {
         // attach goals to all tiles
         void link_goals();
 };
-
-#define MAX_TILES 19
 
 // Available resources
 enum class Resources {

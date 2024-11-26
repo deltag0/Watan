@@ -23,8 +23,10 @@ Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals
     }
 
     if (filename != "") {
-        if (load) ;
-        else get_board(filename);
+        // board from a saved game will AFTER the line = number of players + 1
+        if (load) get_board(filename, NUM_PLAYERS + 2);
+        // when only loading the board, board is on the first line
+        else get_board(filename, 1);
     }
     else {
         initialize_tiles(seed, is_seed);
@@ -287,11 +289,12 @@ void Board::initialize_tiles(int seed, bool with_seed) {
     }
 }
 
-void Board::get_board(const std::string &filename) {
+// need to add line parameter to know which line the board info is at
+void Board::get_board(const std::string &filename, int line_num) {
     std::ifstream ifs{filename};
     std::string line = "";
 
-    for (int i = 0; i < NUM_PLAYERS + 2; i++) {
+    for (int i = 0; i < line_num; i++) {
         std::getline(ifs, line);
     }
 
@@ -470,8 +473,8 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     Tile *botright = tile->get_bot_right();
     Tile *botleft = tile->get_bot_left();
 
-    bool in_the_way_right = tile->get_criteria()[4]->in_the_way(&player);
-    bool in_the_way_left = tile->get_criteria()[5]->in_the_way(&player);
+    bool in_the_way_right = tile->get_criteria()[5]->in_the_way(&player);
+    bool in_the_way_left = tile->get_criteria()[4]->in_the_way(&player);
 
     if (!in_the_way_right && botright && player.owns_goal(botright->goals[3]->get_pos())) {
         return true;
