@@ -22,7 +22,6 @@ p_list{Player {'B', "Blue", 0},
         Player {'Y', "Yellow", 3}}, sot{true}, turn{0} {}
 
 bool Game_Controller::play() {
-    //TODO: ADD CHECKS FOR CRITERIA NEXT TO OTHER OWNED CRITERIA
     for (int i = 0; i < NUM_PLAYERS; i++) {
         int pos = 0;
         cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
@@ -53,9 +52,6 @@ bool Game_Controller::play() {
         p_list[i].owned_criterions.insert(pos);
     }
 
-    cin.clear();
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
     // main loop
     while (!game_over()) {
         string curr = "";
@@ -76,7 +72,6 @@ bool Game_Controller::play() {
 
         check_roll(roll);
 
-        cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         while (curr != "next") {
@@ -288,6 +283,7 @@ string Game_Controller::check_command(const string &command) {
     }
     else return invalid_command(invalid_message);
 
+    // cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return first;
 }
 
@@ -364,6 +360,7 @@ string Game_Controller::invalid_command(const string &message) {
 
     std::getline(cin, new_command);
 
+    //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return check_command(new_command);
 }
 
@@ -377,11 +374,16 @@ int Game_Controller::roll_dice() const {
     else {
         int roll = 0;
 
-        while (roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
-            cout << "Input a roll between 2 and 12: ";
-            cin >> roll;
+        cout << "Input a roll between 2 and 12: ";
 
-            if (roll > MAX_ROLL || roll < MIN_ROLL) cout << "Invalid roll." << std::endl;
+        cin >> roll;
+
+        while ((!cin >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
+
+            if (roll > MAX_ROLL || roll < MIN_ROLL) cout << "\nInvalid roll.";
+
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return roll;
@@ -399,6 +401,7 @@ int Game_Controller::get_criterion() const {
         return get_criterion();
     }
 
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return pos;
 }
 
@@ -794,6 +797,7 @@ void Game_Controller::steal(int location) {
 
     cout << "Choose a student to steal from.\n";
     cout << '>';
+
 
     while (!(cin >> student_to_steal) || !is_color(student_to_steal) 
             || players_on_map[color_to_name(student_to_steal)] == 0) {
