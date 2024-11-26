@@ -9,7 +9,7 @@
 #include "board.h"
 #include "criterion.h"
 
-
+#define NUM_PLAYERS 4
 enum class Resources;
 class Game_Controller;
 

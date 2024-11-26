@@ -10,7 +10,6 @@ using std::string;
 
 struct Player;
 
-#define NUM_PLAYERS 4
 #define MIN_ROLL 2
 #define MAX_ROLL 12
 

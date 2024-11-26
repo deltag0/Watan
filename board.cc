@@ -2,13 +2,15 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <assert.h>
 
 #include "stdexcept"
 #include "board.h"
 
 
-Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
+Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals(MAX_GOAL, nullptr), all_criteria(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
     // Initializing every goal
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = new Goal{i};
@@ -20,7 +22,13 @@ Board::Board(int seed, bool is_seed): all_goals(MAX_GOAL, nullptr), all_criteria
         assert(all_criteria[i]);
     }
 
-    initialize_tiles(seed, is_seed);
+    if (filename != "") {
+        if (load) ;
+        else get_board(filename);
+    }
+    else {
+        initialize_tiles(seed, is_seed);
+    }
     link_criteria();
     link_goals();
     // for (Tile *&t : tiles) {  <-- debug_print
@@ -279,6 +287,33 @@ void Board::initialize_tiles(int seed, bool with_seed) {
     }
 }
 
+void Board::get_board(const std::string &filename) {
+    std::ifstream ifs{filename};
+    std::string line = "";
+
+    for (int i = 0; i < NUM_PLAYERS + 2; i++) {
+        std::getline(ifs, line);
+    }
+
+    std::istringstream iss{line};
+
+    for (int i = 0; i < MAX_TILES; i++) {
+        int resource_num = 0;
+        int roll_val = 0;
+        iss >> resource_num >> roll_val;
+
+        Tile *curr_tile = new Tile{NumToResource(resource_num), i, roll_val, this};
+        tiles[i] = curr_tile;
+    }
+    std::getline(ifs, line);
+    std::istringstream iss2{line};
+    int goose = 0;
+    iss2 >> goose;
+
+    goose_tile = tiles[goose];
+    goose_tile->has_goose = true;
+}
+
 // returns true if Player player can connect the goal (but doesn't verify resources)
 bool Board::can_achieve(int pos, Player player) const {
     if (all_goals[pos]->get_player() != nullptr) {
@@ -517,5 +552,24 @@ int ResourceToNum(Resources resource) {
             return 5;
         default:
             throw std::invalid_argument("Invalid Resources value");
+    }
+}
+
+Resources NumToResource(int num) {
+    switch (num) {
+        case 0:
+            return Resources::CAFFEINE;
+        case 1:
+            return Resources::LAB;
+        case 2:
+            return Resources::LECTURE;
+        case 3:
+            return Resources::STUDY;
+        case 4:
+            return Resources::TUTORIAL;
+        case 5:
+            return Resources::NETFLIX;
+        default:
+            throw std::invalid_argument("Invalid number for Resources");
     }
 }

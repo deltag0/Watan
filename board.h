@@ -21,11 +21,12 @@ class Criterion;
 // Includes Tiles, Goose placement, 
 class Board {
     public:
-        Board(int seed = 0, bool is_seed = false);
+        Board(int seed = 0, bool is_seed = false, std::string filename = "", bool load = false);
         const std::vector<Tile *> &get_tiles() const;
         const std::vector<Goal *> &get_goals() const;
         const std::vector<Criterion *> &get_criteria() const;
         void initialize_tiles(int seed = 0, bool with_seed = false);
+        void get_board(const std::string &filename);
         bool can_achieve(int pos, Player player) const;
         
         // helper functions for can_achieve() for different positions of goals
@@ -71,5 +72,7 @@ std::string ResourceToString(Resources resource);
 Resources StringToResource(const std::string &resource);
 
 int ResourceToNum(Resources resource);
+
+Resources NumToResource(int num);
 
 #endif

@@ -22,6 +22,8 @@ using std::cin;
 int main(int argc, char *argv[]) {
     int seed = 0;
     bool is_seed = false;
+    string filename = "";
+    bool load = false;
     string game;
     string loaded_board;
 
@@ -38,22 +40,38 @@ int main(int argc, char *argv[]) {
                 seed = std::stoi(num);
                 is_seed = true;
             }
-            // figure out how to catch if input is greater than an integer
             catch(const std::exception& e)
             {
                 std::cerr << e.what() << '\n';
             }
         }
         else if (arg == "-load") {
-            // TODO
+            i++;
+            try
+            {
+                filename = argv[i];
+                load = true;
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
         }
         else if (arg == "-board") {
-            // TODO
+            i++;
+            try
+            {
+                filename = argv[i];
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
         }
         i++;
     }
 
-    Board board{seed, is_seed};
+    Board board{seed, is_seed, filename, load};
 
     Game_Controller controller{board};
     bool play_again = controller.play();
