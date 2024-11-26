@@ -372,20 +372,17 @@ int Game_Controller::roll_dice() const {
         return dist(rng);
     }
     else {
-        int roll = 0;
+        int roll = 2;
 
         cout << "Input a roll between 2 and 12: ";
 
-        cin >> roll;
-
-        while ((!cin >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
-
-            if (roll > MAX_ROLL || roll < MIN_ROLL) cout << "\nInvalid roll.";
-
+        while (!(cin >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
+            cout << "Invalid roll.\n";
+            cout << "Input a roll between 2 and 12: ";
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
         return roll;
     }
 }
@@ -679,10 +676,8 @@ void Game_Controller::move_geese() {
     for (int i = 0; i < MAX_TILES; i++) {
         assert(board.get_tiles()[i]);
     }
-
-    cin >> location;
-
-    while ((!cin >> location) || location < 0 || location > 18 || (board.get_tiles()[location])->has_goose) {
+ 
+    while (!(cin >> location) || location < 0 || location > 18 || (board.get_tiles()[location])->has_goose) {
         cout << invalid_message << '\n';
         cout << '>';
         if (!(cin >> location)) {
