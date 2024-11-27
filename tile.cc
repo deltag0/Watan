@@ -71,3 +71,19 @@ Tile* Tile::get_bot_right() const {
 Resources Tile::get_resource() const{
     return resource;
 }
+
+std::string Tile::display_resource() const {
+    return ResourceToString(resource) + std::string((MAX_RESOURCE_LENGTH - ResourceToString(resource).length()), ' ');
+}
+
+std::string Tile::display_roll_val() const {
+    if (resource == Resources::NETFLIX) {
+        return "  ";
+    }
+    return (roll_value < 10) ? (" " + std::to_string(roll_value)) : std::to_string(roll_value);
+}
+
+std::string Tile::display_goose() const {
+    return has_goose ? "GEESE" : "     ";
+}
+

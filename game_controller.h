@@ -7,6 +7,7 @@
 using std::string;
 
 #include "board.h"
+#include "view.h"
 
 struct Player;
 
@@ -23,13 +24,14 @@ const string invalid_tile = "Not a valid tile";
 
 class Game_Controller {
     Board &board;
+    View &view;
     Player p_list[NUM_PLAYERS];
 
     bool sot;  // True if it's the start of turn
     int turn;
 
     public:
-        Game_Controller(Board &b);
+        Game_Controller(Board &b, View &v);
 
         string check_command(const string &command);
         string invalid_command(const string &message);

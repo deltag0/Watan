@@ -16,7 +16,7 @@ using std::vector;
 using std::cin;
 using std::string;
 
-Game_Controller::Game_Controller(Board &b): board{b}, 
+Game_Controller::Game_Controller(Board &b, View &v): board{b}, view{v},
 p_list{Player {'B', "Blue", 0},
         Player {'R', "Red", 1},
         Player {'O', "Orange", 2},
@@ -35,6 +35,8 @@ bool Game_Controller::play() {
         }
 
         board.get_criteria()[pos]->set_player(&(p_list[i]));
+        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
     }
 
@@ -50,6 +52,8 @@ bool Game_Controller::play() {
         }
         
         board.get_criteria()[pos]->set_player(&(p_list[i]));
+        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
     }
 
@@ -121,7 +125,7 @@ string Game_Controller::check_command(const string &command) {
     }
     
     if (first == "board") {
-        // print board;
+        view.display(board);
     }
     else if (first == "status") {
         int save_turn = turn;
@@ -163,6 +167,8 @@ string Game_Controller::check_command(const string &command) {
         
         p_list[turn].owned_goal.insert(pos);
         board.get_goals()[pos]->set_player(&(p_list[turn]));
+        string s = string{p_list[turn].color} + "A";
+        board.get_goals()[pos]->set_display(s);
     }
     else if (first == "complete") {
         int pos;
@@ -184,6 +190,9 @@ string Game_Controller::check_command(const string &command) {
 
         p_list[turn].owned_criterions.insert(pos);
         board.get_criteria()[pos]->set_player(&(p_list[turn]));
+        string s = string{p_list[turn].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
+        ++p_list[turn].points;
     }
     else if (first == "improve") {
         int pos;
@@ -195,12 +204,15 @@ string Game_Controller::check_command(const string &command) {
             return invalid_command(invalid_place);
         }
 
+        string s = board.get_criteria()[pos]->get_display();
+
         switch (board.get_criteria()[pos]->get_level()) {
             case 0:
                 if (p_list[turn].lecture_count < 2 || p_list[turn].study_count < 3) return invalid_command(invalid_resources);
                 
                 p_list[turn].lecture_count -= 2;
                 p_list[turn].study_count -= 3;
+                s = string{p_list[turn].color} + "M";
                 break;
             case 1:
                 if (p_list[turn].caffeine_count < 3
@@ -214,9 +226,11 @@ string Game_Controller::check_command(const string &command) {
                 p_list[turn].lecture_count -= 2;
                 --p_list[turn].tutorial_count;
                 p_list[turn].study_count -= 2;
+                s = string{p_list[turn].color} + "E";
                 break;
         }
         board.get_criteria()[pos]->increase_level();
+        board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
     }
     else if (first == "trade") {

@@ -14,6 +14,7 @@
 #include "criterion.h"
 #include "goal.h"
 #include "player.h"
+#include "textview.h"
 
 using std::string;
 using std::cout;
@@ -72,8 +73,9 @@ int main(int argc, char *argv[]) {
     }
 
     Board board{seed, is_seed, filename, load};
+    TextView view{};
 
-    Game_Controller controller{board};
+    Game_Controller controller{board, view};
     bool play_again = controller.play();
     while (play_again) {  // play until user enters "no"
         play_again = controller.play();

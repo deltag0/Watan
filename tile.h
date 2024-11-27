@@ -40,6 +40,11 @@ class Tile {
         Tile* get_top_right() const;
         Tile* get_bot_right() const;
 
+        // functions for print
+        std::string display_resource() const;
+        std::string display_roll_val() const;
+        std::string display_goose() const;
+
     private:
         Tile(Resources r, int pos, int roll_value, Board *board);
         Board *board;
