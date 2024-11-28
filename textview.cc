@@ -47,7 +47,7 @@ void TextView::display(Board &b) const {
     cout << "                                 \\     " << b.get_tiles()[18]->display_goose() << "      /\n";
     cout << "                                 " << b.get_goals()[69]->get_display() << "             " << b.get_goals()[70]->get_display() << "\n";
     cout << "                                   \\            /\n";
-    cout << "                                   |" << b.get_criteria()[52]->get_display() << "|--" << b.get_goals()[71]->get_display() << "--|" << b.get_criteria()[53]->get_display() << std::endl;
+    cout << "                                   |" << b.get_criteria()[52]->get_display() << "|--" << b.get_goals()[71]->get_display() << "--|" << b.get_criteria()[53]->get_display() << "|" << std::endl;
 
 
     // cout << "                                   |32|--44--|33|\n";
