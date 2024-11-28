@@ -60,6 +60,10 @@ bool Game_Controller::play() {
             while (curr != "roll") {
                 cout << '>';
                 std::getline(cin, curr);
+                if (cin.eof()) {
+                    save_game("backup.sv");
+                    exit(0);
+                }
 
                 curr = check_command(curr);
             }
@@ -72,6 +76,10 @@ bool Game_Controller::play() {
         while (curr != "next") {
             cout << '>';
             std::getline(cin, curr);
+            if (cin.eof()) {
+                save_game("backup.sv");
+                exit(0);
+            }
 
             curr = check_command(curr);
         }
@@ -88,8 +96,12 @@ bool Game_Controller::play() {
             return false;
         }
         else {
-            cout << "Invalid command." << std::endl;
+            cout << invalid_command(invalid_message);
         }
+    }
+    if (cin.eof()) {
+        save_game("backup.sv");
+        exit(0);
     }
 }
 
@@ -109,6 +121,7 @@ void Game_Controller::start_game() {
         string s = string{p_list[i].color} + "A";
         board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
+        ++p_list[i].points;
     }
 
     for (int i = NUM_PLAYERS - 1; i >= 0; i--) {
@@ -126,6 +139,7 @@ void Game_Controller::start_game() {
         string s = string{p_list[i].color} + "A";
         board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
+        ++p_list[i].points;
     }
 }
 
@@ -212,6 +226,7 @@ string Game_Controller::check_command(const string &command) {
         string s = string{p_list[turn].color} + "A";
         board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
+        if (p_list[turn].points == 10) return "next";  // ends the game 
     } else if (first == "improve") {
         int pos;
         if (!(iss >> pos)) {
@@ -246,6 +261,7 @@ string Game_Controller::check_command(const string &command) {
         board.get_criteria()[pos]->increase_level();
         board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
+        if (p_list[turn].points == 10) return "next";  // ends the game 
     } else if (first == "trade") {
         string ans = "";
         string partner = "";
@@ -761,7 +777,7 @@ void Game_Controller::resources_7() {
     }
 }
 
-bool Game_Controller::tile_error(int tile) { return tile < 0 || tile > 18; }
+bool Game_Controller::tile_error(int tile) { return tile < 0 || tile >= MAX_TILES; }
 
 bool Game_Controller::goose_error(int tile) { return board.get_tiles()[tile]->has_goose; }
 
@@ -828,7 +844,7 @@ void Game_Controller::steal(int location) {
     }
 
     if (last_student == -1) {
-        cout << "Student " << p_list[turn] << " has no students to steal from.\n";
+        cout << "Student " << p_list[turn].name << " has no students to steal from.\n";
         return;
     }
 
