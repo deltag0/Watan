@@ -1,20 +1,22 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <stdexcept>
-#include <random>
-#include <algorithm>
-#include <vector>
-#include <assert.h>
-#include <numeric>
-
 #include "game_controller.h"
+
+#include <assert.h>
+
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <numeric>
+#include <random>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
+
 #include "player.h"
 
-using std::cout;
-using std::vector;
 using std::cin;
+using std::cout;
 using std::string;
+using std::vector;
 
 Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load): board{b}, view{v},
 p_list{Player {'B', "Blue", 0},
@@ -119,7 +121,7 @@ void Game_Controller::start_game() {
             cout << invalid_place << '\n';
             pos = get_criterion();
         }
-        
+
         board.get_criteria()[pos]->set_player(&(p_list[i]));
         string s = string{p_list[i].color} + "A";
         board.get_criteria()[pos]->set_display(s);
@@ -136,22 +138,19 @@ string Game_Controller::check_command(const string &command) {
     if (sot) {
         if (first == "load") {
             p_list[turn].die = Dice::LOADED;
-        }
-        else if (first == "fair") {
-        p_list[turn].die = Dice::FAIR;
-        }
-        else if (first == "roll") {
+        } else if (first == "fair") {
+            p_list[turn].die = Dice::FAIR;
+        } else if (first == "roll") {
             sot = false;
-        }
-        else return invalid_command(invalid_message);
+        } else
+            return invalid_command(invalid_message);
 
         return first;
     }
-    
+
     if (first == "board") {
         view.display(board);
-    }
-    else if (first == "status") {
+    } else if (first == "status") {
         int save_turn = turn;
         turn = 0;
         for (int i = 0; i < NUM_PLAYERS; i++) {
@@ -159,28 +158,28 @@ string Game_Controller::check_command(const string &command) {
             turn++;
         }
         turn = save_turn;
-    }
-    else if (first == "criteria") {
+    } else if (first == "criteria") {
         cout << "Student has completed the following criteria:";
-        for (auto criteria: p_list[turn].owned_criterions) {
+        for (auto criteria : p_list[turn].owned_criterions) {
             cout << " " << criteria;
         }
         cout << std::endl;
-    }
-    else if (first == "achieve") {
+    } else if (first == "achieve") {
         int pos;
-        
+
         if (!(iss >> pos)) {
             iss.clear();
             iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             return invalid_command(invalid_message);
         }
-        
+
         if (pos < 0 || pos >= MAX_GOAL) return invalid_command(invalid_place);
 
         bool can_achieve = board.can_achieve(pos, p_list[turn]);
 
-        if (!can_achieve) {return invalid_command(invalid_place);}
+        if (!can_achieve) {
+            return invalid_command(invalid_place);
+        }
 
         if (p_list[turn].study_count == 0 || p_list[turn].tutorial_count == 0) {
             return invalid_command(invalid_resources);
@@ -188,13 +187,12 @@ string Game_Controller::check_command(const string &command) {
 
         p_list[turn].study_count--;
         p_list[turn].tutorial_count--;
-        
+
         p_list[turn].owned_goal.insert(pos);
         board.get_goals()[pos]->set_player(&(p_list[turn]));
         string s = string{p_list[turn].color} + "A";
         board.get_goals()[pos]->set_display(s);
-    }
-    else if (first == "complete") {
+    } else if (first == "complete") {
         int pos;
         if (!(iss >> pos)) {
             return invalid_command(invalid_message);
@@ -202,11 +200,8 @@ string Game_Controller::check_command(const string &command) {
 
         if (pos < 0 || pos >= MAX_CRITERION || !can_complete(pos)) return invalid_command(invalid_place);
 
-        if (p_list[turn].caffeine_count < 1
-         || p_list[turn].lab_count < 1
-         || p_list[turn].lecture_count < 1
-         || p_list[turn].tutorial_count < 1) return invalid_command(invalid_resources);
-        
+        if (p_list[turn].caffeine_count < 1 || p_list[turn].lab_count < 1 || p_list[turn].lecture_count < 1 || p_list[turn].tutorial_count < 1) return invalid_command(invalid_resources);
+
         --p_list[turn].caffeine_count;
         --p_list[turn].lab_count;
         --p_list[turn].lecture_count;
@@ -217,8 +212,7 @@ string Game_Controller::check_command(const string &command) {
         string s = string{p_list[turn].color} + "A";
         board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
-    }
-    else if (first == "improve") {
+    } else if (first == "improve") {
         int pos;
         if (!(iss >> pos)) {
             return invalid_command(invalid_message);
@@ -233,17 +227,13 @@ string Game_Controller::check_command(const string &command) {
         switch (board.get_criteria()[pos]->get_level()) {
             case 0:
                 if (p_list[turn].lecture_count < 2 || p_list[turn].study_count < 3) return invalid_command(invalid_resources);
-                
+
                 p_list[turn].lecture_count -= 2;
                 p_list[turn].study_count -= 3;
                 s = string{p_list[turn].color} + "M";
                 break;
             case 1:
-                if (p_list[turn].caffeine_count < 3
-                 || p_list[turn].lab_count < 2
-                 || p_list[turn].lecture_count < 2
-                 || p_list[turn].tutorial_count < 1
-                 || p_list[turn].study_count < 2) return invalid_command(invalid_resources);
+                if (p_list[turn].caffeine_count < 3 || p_list[turn].lab_count < 2 || p_list[turn].lecture_count < 2 || p_list[turn].tutorial_count < 1 || p_list[turn].study_count < 2) return invalid_command(invalid_resources);
 
                 p_list[turn].caffeine_count -= 3;
                 p_list[turn].lab_count -= 2;
@@ -256,20 +246,15 @@ string Game_Controller::check_command(const string &command) {
         board.get_criteria()[pos]->increase_level();
         board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
-    }
-    else if (first == "trade") {
+    } else if (first == "trade") {
         string ans = "";
         string partner = "";
         string give_resource = "";
         string take_resource = "";
-        if (!(iss >> partner >> give_resource >> take_resource) 
-        || !is_color(partner) 
-        || partner == p_list[turn].name
-        || !is_resource(give_resource) 
-        || !is_resource(take_resource)) {
+        if (!(iss >> partner >> give_resource >> take_resource) || !is_color(partner) || partner == p_list[turn].name || !is_resource(give_resource) || !is_resource(take_resource)) {
             return invalid_command(invalid_message);
         }
-        
+
         Resources resource1 = StringToResource(give_resource);
         int &p1_give_resource = p_list[turn].find_resources(resource1);
 
@@ -280,17 +265,25 @@ string Game_Controller::check_command(const string &command) {
         Resources resource2 = StringToResource(take_resource);
 
         cout << p_list[turn].name << " offers " << partner << " one " << give_resource
-        << " for one " << take_resource << ".\n" << "Does " << partner << " accept this offer?" << '\n';\
-        
+             << " for one " << take_resource << ".\n"
+             << "Does " << partner << " accept this offer?" << '\n';
+
         cout << '>';
         std::getline(cin, ans);
+        if (cin.eof()) {
+            save_game("backup.sv");
+            exit(0);
+        }
 
         while (ans != "yes" && ans != "no") {
             cout << invalid_message << '\n';
             cout << '>';
             std::getline(cin, ans);
+            if (cin.eof()) {
+                save_game("backup.sv");
+                exit(0);
+            }
         }
-        
 
         if (ans == "yes") {
             int &p1_gain_resource = p_list[turn].find_resources(resource2);
@@ -303,32 +296,29 @@ string Game_Controller::check_command(const string &command) {
             p2_gain_resource++;
             p2_give_resource--;
         }
-    }
-    else if (first == "next") {
+    } else if (first == "next") {
         sot = true;
         turn++;
         if (turn == NUM_PLAYERS) turn = 0;
-    }
-    else if (first == "save") {
+    } else if (first == "save") {
         string filename = "";
         if (!(iss >> filename)) return invalid_command(invalid_message);
 
         save_game(filename);
-    }
-    else if (first == "help") {
+    } else if (first == "help") {
         cout << "Valid commands:\n"
-        << " board\n"
-        << " status\n"
-        << " criteria\n"
-        << " achieve <goal>\n"
-        << " complete <criterion>\n"
-        << " improve <criterion>\n"
-        << " trade <colour> <give> <take>\n"
-        << " next\n"
-        << " save <file>\n"
-        << " help" << std::endl;
-    }
-    else return invalid_command(invalid_message);
+             << " board\n"
+             << " status\n"
+             << " criteria\n"
+             << " achieve <goal>\n"
+             << " complete <criterion>\n"
+             << " improve <criterion>\n"
+             << " trade <colour> <give> <take>\n"
+             << " next\n"
+             << " save <file>\n"
+             << " help" << std::endl;
+    } else
+        return invalid_command(invalid_message);
 
     // cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return first;
@@ -347,7 +337,7 @@ void Game_Controller::check_roll(const int roll) {
     bool gained = false;
 
     for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
-                                Resources::STUDY, Resources::TUTORIAL}) {
+                               Resources::STUDY, Resources::TUTORIAL}) {
         for (int i = 0; i < NUM_PLAYERS; i++) {
             resources_gained[resource][i] = 0;
         }
@@ -358,12 +348,12 @@ void Game_Controller::check_roll(const int roll) {
         return;
     }
 
-    for (auto tile: board.get_tiles()) {
+    for (auto tile : board.get_tiles()) {
         assert(tile);
         if (tile->get_roll_val() == roll) {
             vector<Criterion *> criterias = tile->get_criteria();
 
-            for (auto criteria: criterias) {
+            for (auto criteria : criterias) {
                 assert(criteria);
                 Player *owner = get_criterion_owner(criteria->get_pos());
 
@@ -379,7 +369,7 @@ void Game_Controller::check_roll(const int roll) {
     for (int i = 0; i < NUM_PLAYERS; i++) {
         string output = "";
         for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
-                                Resources::STUDY, Resources::TUTORIAL}) {
+                                   Resources::STUDY, Resources::TUTORIAL}) {
             int gained = resources_gained[resource][i];
 
             if (gained > 0) {
@@ -397,7 +387,7 @@ void Game_Controller::check_roll(const int roll) {
     }
 }
 
-void Game_Controller::print_status() const {cout << p_list[turn];}
+void Game_Controller::print_status() const { cout << p_list[turn]; }
 
 string Game_Controller::invalid_command(const string &message) {
     string new_command = "";
@@ -406,8 +396,12 @@ string Game_Controller::invalid_command(const string &message) {
     cout << '>';
 
     std::getline(cin, new_command);
+    if (cin.eof()) {
+        save_game("backup.sv");
+        exit(0);
+    }
 
-    //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    // cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return check_command(new_command);
 }
 
@@ -417,13 +411,16 @@ int Game_Controller::roll_dice() const {
         std::mt19937 rng(rd());
         std::uniform_int_distribution<int> dist(2, 12);
         return dist(rng);
-    }
-    else {
+    } else {
         int roll = 2;
 
         cout << "Input a roll between 2 and 12: ";
 
         while (!(cin >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
+            if (cin.eof()) {
+                save_game("backup.sv");
+                exit(0);
+            }
             cout << "Invalid roll.\n";
             cout << "Input a roll between 2 and 12: ";
             cin.clear();
@@ -439,6 +436,10 @@ int Game_Controller::get_criterion() const {
 
     cout << '>';
     if (!(cin >> pos) || pos < 0 || pos >= MAX_CRITERION) {
+        if (cin.eof()) {
+            save_game("backup.sv");
+            exit(0);
+        }
         cout << "You cannot build here.\n";
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -513,17 +514,16 @@ bool Game_Controller::check_complete_0(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[1]->get_pos()) && !is_criterion_owned(tile->get_criteria()[2]->get_pos());
-    
+
     // check if same tile is good and adjacent criterion on other tile is not completed
-    if (can_complete && topleft) can_complete = !is_criterion_owned(topleft->get_criteria()[1]->get_pos());
-    else if (can_complete && top) can_complete = !is_criterion_owned(top->get_criteria()[2]->get_pos());
+    if (can_complete && topleft)
+        can_complete = !is_criterion_owned(topleft->get_criteria()[1]->get_pos());
+    else if (can_complete && top)
+        can_complete = !is_criterion_owned(top->get_criteria()[2]->get_pos());
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[1]->get_pos())
-                    || (topleft && p_list[turn].owns_goal(topleft->get_goals()[2]->get_pos()))
-                    || (top && p_list[turn].owns_goal(top->get_goals()[3]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[1]->get_pos()) || (topleft && p_list[turn].owns_goal(topleft->get_goals()[2]->get_pos())) || (top && p_list[turn].owns_goal(top->get_goals()[3]->get_pos()));
     }
 
     return can_complete;
@@ -536,17 +536,17 @@ bool Game_Controller::check_complete_1(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[0]->get_pos()) && !is_criterion_owned(tile->get_criteria()[3]->get_pos());
-    
+
     // check if same tile is good and adjacent criterion on other tile is not completed
-    if (can_complete && topright) can_complete = !is_criterion_owned(topright->get_criteria()[0]->get_pos());
-    else if (can_complete && top) !is_criterion_owned(top->get_criteria()[3]->get_pos());;
+    if (can_complete && topright)
+        can_complete = !is_criterion_owned(topright->get_criteria()[0]->get_pos());
+    else if (can_complete && top)
+        !is_criterion_owned(top->get_criteria()[3]->get_pos());
+    ;
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[2]->get_pos())
-                    || (topright && p_list[turn].owns_goal(topright->get_goals()[1]->get_pos()))
-                    || (top && p_list[turn].owns_goal(top->get_goals()[4]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[2]->get_pos()) || (topright && p_list[turn].owns_goal(topright->get_goals()[1]->get_pos())) || (top && p_list[turn].owns_goal(top->get_goals()[4]->get_pos()));
     }
 
     return can_complete;
@@ -559,17 +559,16 @@ bool Game_Controller::check_complete_2(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[0]->get_pos()) && !is_criterion_owned(tile->get_criteria()[4]->get_pos());
-    
+
     // if still good, check if adjacent criterion on other tile is not completed
-    if (can_complete && botleft) can_complete = !is_criterion_owned(botleft->get_criteria()[0]->get_pos());
-    else if (can_complete && topleft) can_complete = !is_criterion_owned(topleft->get_criteria()[4]->get_pos());
+    if (can_complete && botleft)
+        can_complete = !is_criterion_owned(botleft->get_criteria()[0]->get_pos());
+    else if (can_complete && topleft)
+        can_complete = !is_criterion_owned(topleft->get_criteria()[4]->get_pos());
 
     // if not start of turn and is still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[1]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[3]->get_pos())
-                    || (botleft && p_list[turn].owns_goal(botleft->get_goals()[0]->get_pos()))
-                    || (topleft && p_list[turn].owns_goal(topleft->get_goals()[5]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[1]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[3]->get_pos()) || (botleft && p_list[turn].owns_goal(botleft->get_goals()[0]->get_pos())) || (topleft && p_list[turn].owns_goal(topleft->get_goals()[5]->get_pos()));
     }
 
     return can_complete;
@@ -582,17 +581,16 @@ bool Game_Controller::check_complete_3(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[1]->get_pos()) && !is_criterion_owned(tile->get_criteria()[5]->get_pos());
-    
+
     // if still good, check if adjacent criterion on other tile is not completed
-    if (can_complete && botright) can_complete = !is_criterion_owned(botright->get_criteria()[1]->get_pos());
-    else if (can_complete && topright) can_complete = !is_criterion_owned(topright->get_criteria()[5]->get_pos());
+    if (can_complete && botright)
+        can_complete = !is_criterion_owned(botright->get_criteria()[1]->get_pos());
+    else if (can_complete && topright)
+        can_complete = !is_criterion_owned(topright->get_criteria()[5]->get_pos());
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[2]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[4]->get_pos())
-                    || (botright && p_list[turn].owns_goal(botright->get_goals()[0]->get_pos()))
-                    || (topright && p_list[turn].owns_goal(topright->get_goals()[5]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[2]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[4]->get_pos()) || (botright && p_list[turn].owns_goal(botright->get_goals()[0]->get_pos())) || (topright && p_list[turn].owns_goal(topright->get_goals()[5]->get_pos()));
     }
 
     return can_complete;
@@ -605,17 +603,16 @@ bool Game_Controller::check_complete_4(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[2]->get_pos()) && !is_criterion_owned(tile->get_criteria()[5]->get_pos());
-    
+
     // if still good, check if adjacent criterion on other tile is not completed
-    if (can_complete && botleft) can_complete = !is_criterion_owned(botleft->get_criteria()[5]->get_pos());
-    else if (can_complete && bot) can_complete = !is_criterion_owned(bot->get_criteria()[2]->get_pos());
+    if (can_complete && botleft)
+        can_complete = !is_criterion_owned(botleft->get_criteria()[5]->get_pos());
+    else if (can_complete && bot)
+        can_complete = !is_criterion_owned(bot->get_criteria()[2]->get_pos());
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[3]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos())
-                    || (botleft && p_list[turn].owns_goal(botleft->get_goals()[4]->get_pos()))
-                    || (bot && p_list[turn].owns_goal(bot->get_goals()[1]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[3]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos()) || (botleft && p_list[turn].owns_goal(botleft->get_goals()[4]->get_pos())) || (bot && p_list[turn].owns_goal(bot->get_goals()[1]->get_pos()));
     }
 
     return can_complete;
@@ -628,23 +625,22 @@ bool Game_Controller::check_complete_5(const int pos) const {
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !is_criterion_owned(tile->get_criteria()[3]->get_pos()) && !is_criterion_owned(tile->get_criteria()[4]->get_pos());
-    
+
     // if still good, check if adjacent criterion on other tile is not completed
-    if (can_complete && botright) can_complete = !is_criterion_owned(botright->get_criteria()[4]->get_pos());
-    else if (can_complete && bot) can_complete = !is_criterion_owned(bot->get_criteria()[3]->get_pos());
+    if (can_complete && botright)
+        can_complete = !is_criterion_owned(botright->get_criteria()[4]->get_pos());
+    else if (can_complete && bot)
+        can_complete = !is_criterion_owned(bot->get_criteria()[3]->get_pos());
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[4]->get_pos())
-                    || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos())
-                    || (botright && p_list[turn].owns_goal(botright->get_goals()[3]->get_pos()))
-                    || (bot && p_list[turn].owns_goal(bot->get_goals()[2]->get_pos()));
+        can_complete = p_list[turn].owns_goal(tile->get_goals()[4]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos()) || (botright && p_list[turn].owns_goal(botright->get_goals()[3]->get_pos())) || (bot && p_list[turn].owns_goal(bot->get_goals()[2]->get_pos()));
     }
 
     return can_complete;
 }
 
-void Game_Controller::add_resource(const Resources name, Player& player) {
+void Game_Controller::add_resource(const Resources name, Player &player) {
     switch (name) {
         case Resources::CAFFEINE:
             player.caffeine_count++;
@@ -723,12 +719,18 @@ void Game_Controller::move_geese() {
     for (int i = 0; i < MAX_TILES; i++) {
         assert(board.get_tiles()[i]);
     }
- 
+
     while (!(cin >> location) || tile_error(location) || goose_error(location)) {
+        if (cin.eof()) {
+            save_game("backup.sv");
+            exit(0);
+        }
         // if input went through, then specify error message
         if (cin) {
-            if (tile_error(location)) cout << invalid_message << '\n';
-            else cout << has_goose << '\n';
+            if (tile_error(location))
+                cout << invalid_message << '\n';
+            else
+                cout << has_goose << '\n';
         }
 
         cout << '>';
@@ -748,9 +750,9 @@ void Game_Controller::resources_7() {
         if (total_resources >= 10) {
             remove_random(total_resources / 2, p_list[i], resources_lost);
 
-            cout << "Student " << p_list[i].name << " loses " << total_resources / 2 << " resources to the geese. They lose:\n"; 
+            cout << "Student " << p_list[i].name << " loses " << total_resources / 2 << " resources to the geese. They lose:\n";
 
-            for (auto const &[resource, count]: resources_lost) {
+            for (auto const &[resource, count] : resources_lost) {
                 if (count != 0) {
                     std::cout << count << " " << ResourceToString(resource) << '\n';
                 }
@@ -759,9 +761,9 @@ void Game_Controller::resources_7() {
     }
 }
 
-bool Game_Controller::tile_error(int tile) {return tile < 0 || tile > 18;}
+bool Game_Controller::tile_error(int tile) { return tile < 0 || tile > 18; }
 
-bool Game_Controller::goose_error(int tile) {return board.get_tiles()[tile]->has_goose;}
+bool Game_Controller::goose_error(int tile) { return board.get_tiles()[tile]->has_goose; }
 
 void Game_Controller::remove_random(const int resources_lost, Player &player, std::map<Resources, int> &lost) {
     int i = 0;
@@ -772,7 +774,7 @@ void Game_Controller::remove_random(const int resources_lost, Player &player, st
 
     while (i < resources_lost) {
         int to_remove = dist(rng);
-        switch(to_remove) {
+        switch (to_remove) {
             case 1:
                 if (player.caffeine_count == 0) continue;
                 lost[Resources::CAFFEINE] += 1;
@@ -811,9 +813,9 @@ void Game_Controller::steal(int location) {
     int players_on_map[NUM_PLAYERS]{0};
     int last_student = -1;
 
-    #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-    for (auto criterion: criterions) {
+    for (auto criterion : criterions) {
         if (criterion->get_player() != nullptr) {
             int idx = criterion->get_player()->idx;
             int total_resources = get_total_resources(idx);
@@ -843,13 +845,14 @@ void Game_Controller::steal(int location) {
 
     cout << ".\n";
 
-
     cout << "Choose a student to steal from.\n";
     cout << '>';
 
-
-    while (!(cin >> student_to_steal) || !is_color(student_to_steal) 
-            || players_on_map[color_to_name(student_to_steal)] == 0) {
+    while (!(cin >> student_to_steal) || !is_color(student_to_steal) || players_on_map[color_to_name(student_to_steal)] == 0) {
+        if (cin.eof()) {
+            save_game("backup.sv");
+            exit(0);
+        }
         cout << invalid_student << '\n';
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -859,7 +862,6 @@ void Game_Controller::steal(int location) {
     Resources stolen;
     int idx = color_to_name(student_to_steal);
     double total = static_cast<double>(get_total_resources(idx));
-
 
     // distribution to generate numbers between 0 and 1 so that we can choose a resource to steal
     std::random_device rd;
@@ -877,23 +879,19 @@ void Game_Controller::steal(int location) {
         p_list[turn].caffeine_count += 1;
         p_list[idx].caffeine_count -= 1;
         stolen = Resources::CAFFEINE;
-    }
-    else if (rand <= prob_lab) {
+    } else if (rand <= prob_lab) {
         p_list[turn].lab_count += 1;
         p_list[idx].lab_count -= 1;
         stolen = Resources::LAB;
-    }
-    else if (rand <= prob_lecture) {
+    } else if (rand <= prob_lecture) {
         p_list[turn].lecture_count += 1;
         p_list[idx].lecture_count -= 1;
         stolen = Resources::LECTURE;
-    }
-    else if (rand <= prob_study) {
+    } else if (rand <= prob_study) {
         p_list[turn].study_count += 1;
         p_list[idx].study_count -= 1;
         stolen = Resources::STUDY;
-    }
-    else {
+    } else {
         p_list[turn].tutorial_count += 1;
         p_list[idx].tutorial_count -= 1;
         stolen = Resources::TUTORIAL;
@@ -927,7 +925,7 @@ void Game_Controller::output_player(std::ostream &out, const int idx) const {
     << p_list[idx].study_count << ' ' << p_list[idx].tutorial_count << " g ";
 
     // output owned goals
-    for (const auto &goal: p_list[idx].owned_goal) {
+    for (const auto &goal : p_list[idx].owned_goal) {
         out << goal << ' ';
     }
     out << "c ";
