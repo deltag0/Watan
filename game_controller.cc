@@ -76,6 +76,7 @@ bool Game_Controller::play() {
         while (curr != "next") {
             cout << '>';
             std::getline(cin, curr);
+            cout << curr << '\n';
             if (cin.eof()) {
                 save_game("backup.sv");
                 exit(0);
@@ -456,7 +457,8 @@ int Game_Controller::get_criterion() const {
             save_game("backup.sv");
             exit(0);
         }
-        cout << "You cannot build here.\n";
+        if (cin) cout << invalid_place << '\n';
+        else cout << invalid_message << '\n';
         cin.clear();
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return get_criterion();
@@ -744,10 +746,11 @@ void Game_Controller::move_geese() {
         // if input went through, then specify error message
         if (cin) {
             if (tile_error(location))
-                cout << invalid_message << '\n';
+                cout << invalid_place << '\n';
             else
                 cout << has_goose << '\n';
         }
+        else cout << invalid_message << '\n';
 
         cout << '>';
         cin.clear();
@@ -836,7 +839,7 @@ void Game_Controller::steal(int location) {
             int idx = criterion->get_player()->idx;
             int total_resources = get_total_resources(idx);
 
-            if (total_resources > 0) {
+            if (total_resources > 0 && idx != turn) {
                 players_on_map[idx] += 1;
                 last_student = MAX(last_student, idx);
             }

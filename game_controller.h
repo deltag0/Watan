@@ -33,6 +33,11 @@ class Game_Controller {
     public:
         Game_Controller(Board &b, View &v, string filename = "", bool load = false);
 
+        bool play();
+
+    private:
+        void start_game();
+
         string check_command(const string &command);
         string invalid_command(const string &message);
 
@@ -76,10 +81,6 @@ class Game_Controller {
         Player *get_criterion_owner(const int pos);
         bool can_complete(const int pos) const;
 
-        bool play();
-        void start_game();
-
-    private:
         // helper functions for can_complete()
         bool check_complete_0(const int pos) const;
         bool check_complete_1(const int pos) const;
