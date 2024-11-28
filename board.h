@@ -4,6 +4,7 @@
 // probably fix something with headers
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "tile.h"
 #include "criterion.h"
@@ -23,9 +24,9 @@ class Criterion;
 class Board {
     public:
         Board(int seed = 0, bool is_seed = false, std::string filename = "", bool load = false);
-        const std::vector<Tile *> &get_tiles() const;
-        const std::vector<Goal *> &get_goals() const;
-        const std::vector<Criterion *> &get_criteria() const;
+        const std::vector<std::unique_ptr<Tile>> &get_tiles() const;
+        const std::vector<std::unique_ptr<Goal>> &get_goals() const;
+        const std::vector<std::unique_ptr<Criterion>> &get_criteria() const;
         
         void initialize_tiles(int seed = 0, bool with_seed = false);
         void get_board(const std::string &filename, int line_num);
@@ -44,9 +45,9 @@ class Board {
         void set_goose(Tile *tile);
 
     private:
-        std::vector<Goal *> all_goals;
-        std::vector<Criterion *>all_criteria;
-        std::vector<Tile *> tiles;
+        std::vector<std::unique_ptr<Goal>> all_goals;
+        std::vector<std::unique_ptr<Criterion>>all_criteria;
+        std::vector<std::unique_ptr<Tile>> tiles;
         Tile *goose_tile;
 
         // Attach criterions to all tiles 

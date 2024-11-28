@@ -364,7 +364,7 @@ void Game_Controller::check_roll(const int roll) {
         return;
     }
 
-    for (auto tile : board.get_tiles()) {
+    for (auto &tile : board.get_tiles()) {
         assert(tile);
         if (tile->get_roll_val() == roll) {
             vector<Criterion *> criterias = tile->get_criteria();
@@ -754,7 +754,7 @@ void Game_Controller::move_geese() {
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
-    board.set_goose(board.get_tiles()[location]);
+    board.set_goose(board.get_tiles()[location].get());
     steal(location);
 }
 

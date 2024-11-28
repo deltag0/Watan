@@ -10,15 +10,15 @@
 #include "board.h"
 
 
-Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals(MAX_GOAL, nullptr), all_criteria(MAX_CRITERION, nullptr), tiles(MAX_TILES, nullptr) {
+Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals(MAX_GOAL), all_criteria(MAX_CRITERION), tiles(MAX_TILES) {
     // Initializing every goal
     for (int i = 0; i < MAX_GOAL; i++) {
-        all_goals[i] = new Goal{i};
+        all_goals[i] = std::make_unique<Goal>(i);
         assert(all_goals[i]);
     }
     // Initializing every criterion
     for (int i = 0; i < MAX_CRITERION; i++) {
-        all_criteria[i] = new Criterion{i};
+        all_criteria[i] = std::make_unique<Criterion>(i);
         assert(all_criteria[i]);
     }
 
@@ -51,11 +51,12 @@ Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals
     // }
 }
 
-const std::vector<Tile *> &Board::get_tiles() const{ return tiles;}
+const std::vector<std::unique_ptr<Tile>> &Board::get_tiles() const { return tiles; }
 
-const std::vector<Goal *> &Board::get_goals() const {return all_goals;}
+const std::vector<std::unique_ptr<Goal>> &Board::get_goals() const { return all_goals; }
 
-const std::vector<Criterion *> &Board::get_criteria() const {return all_criteria;}
+const std::vector<std::unique_ptr<Criterion>> &Board::get_criteria() const { return all_criteria; }
+
 
 void Board::link_criteria() {
     int curr = 0;
@@ -63,61 +64,60 @@ void Board::link_criteria() {
     // set up criteriions
     for (int i = 0; i < MAX_TILES; i++) {
         if (i == 0) {
-            tiles[i]->criteria[2] = all_criteria[3];
-            tiles[i]->criteria[3] = all_criteria[4];
-            tiles[i]->criteria[4] = all_criteria[8];
-            tiles[i]->criteria[5] = all_criteria[9];
+            tiles[i]->criteria[2] = all_criteria[3].get();
+            tiles[i]->criteria[3] = all_criteria[4].get();
+            tiles[i]->criteria[4] = all_criteria[8].get();
+            tiles[i]->criteria[5] = all_criteria[9].get();
         }
         else if (i <= 2 || i == MAX_TILES - 1) {
-            tiles[i]->criteria[2] = all_criteria[curr + 5];
-            tiles[i]->criteria[3] = all_criteria[curr + 6];
+            tiles[i]->criteria[2] = all_criteria[curr + 5].get();
+            tiles[i]->criteria[3] = all_criteria[curr + 6].get();
 
             // bro is special
             if (i == MAX_TILES - 1) {
-                tiles[i]->criteria[4] = all_criteria[curr + 8];
-                tiles[i]->criteria[5] = all_criteria[curr + 9];
+                tiles[i]->criteria[4] = all_criteria[curr + 8].get();
+                tiles[i]->criteria[5] = all_criteria[curr + 9].get();
             }
             else {
                 // set up bottom two criteria
-                tiles[i]->criteria[4] = all_criteria[curr + 11];
-                tiles[i]->criteria[5] = all_criteria[curr + 12];
+                tiles[i]->criteria[4] = all_criteria[curr + 11].get();
+                tiles[i]->criteria[5] = all_criteria[curr + 12].get();
             }
         }
         else {  // set up most tiles. All except 0, 1, 2, 18
             // set up left and right criteria
-            tiles[i]->criteria[2] = all_criteria[curr + 6];
-            tiles[i]->criteria[3] = all_criteria[curr + 7];
+            tiles[i]->criteria[2] = all_criteria[curr + 6].get();
+            tiles[i]->criteria[3] = all_criteria[curr + 7].get();
 
             // bottom 3 tiles (16, 17, 18) are special
             if (i >= 16) {
-                tiles[i]->criteria[4] = all_criteria[curr + 11];
-                tiles[i]->criteria[5] = all_criteria[curr + 12];
+                tiles[i]->criteria[4] = all_criteria[curr + 11].get();
+                tiles[i]->criteria[5] = all_criteria[curr + 12].get();
             }
             else {
                 // set up bottom two criteria
-                tiles[i]->criteria[4] = all_criteria[curr + 12];
-                tiles[i]->criteria[5] = all_criteria[curr + 13];
+                tiles[i]->criteria[4] = all_criteria[curr + 12].get();
+                tiles[i]->criteria[5] = all_criteria[curr + 13].get();
             }
         }
 
         // set up top two criteria
-        tiles[i]->criteria[0] = all_criteria[curr];
+        tiles[i]->criteria[0] = all_criteria[curr].get();
         curr++;
-        tiles[i]->criteria[1] = all_criteria[curr];
+        tiles[i]->criteria[1] = all_criteria[curr].get();
         curr++;
 
         // put this in another function maybe?
         // For each criteria, set corresponding tile to tile at earliest position
         for (int j = 0; j < CORNERS; j++) {
             if (tiles[i]->criteria[j]->get_tile() == nullptr) {
-                tiles[i]->criteria[j]->set_tile(tiles[i]);
+                tiles[i]->criteria[j]->set_tile(tiles[i].get());
             }
         }
 
         // make this the algorithm form maybe
         if (i == MAX_TILES - 2) curr += 3;
         else if (i == 5 ||  i == 7 || i == 10 || i == 12 || i == 15) curr++;
-
     }
 }
 
@@ -129,41 +129,41 @@ void Board::link_goals() {
     for (int i = 0; i < MAX_TILES; ++i) {
         switch (i) {  // special cases
             case 0:
-                tiles[i]->goals[0] = all_goals[0];
-                tiles[i]->goals[1] = all_goals[1];
+                tiles[i]->goals[0] = all_goals[0].get();
+                tiles[i]->goals[1] = all_goals[1].get();
                 add_bl = 5;
                 add_b = 10;
                 break;
             case 1:
-                tiles[i]->goals[0] = all_goals[3];
-                tiles[i]->goals[1] = all_goals[5];
+                tiles[i]->goals[0] = all_goals[3].get();
+                tiles[i]->goals[1] = all_goals[5].get();
                 add_bl = 8;
                 add_b = 15;
                 break;
             case 2:
-                tiles[i]->goals[0] = all_goals[4];
+                tiles[i]->goals[0] = all_goals[4].get();
                 break;
             case 3:
-                tiles[i]->goals[0] = all_goals[9];
-                tiles[i]->goals[1] = all_goals[12];
+                tiles[i]->goals[0] = all_goals[9].get();
+                tiles[i]->goals[1] = all_goals[12].get();
                 add_b = 17;
                 break;
             case 5:
-                tiles[i]->goals[0] = all_goals[11];
+                tiles[i]->goals[0] = all_goals[11].get();
                 break;
             case 6:
                 add_bl = 9;
                 add_b = 17;
                 break;
             case 8:
-                tiles[i]->goals[1] = all_goals[29];
+                tiles[i]->goals[1] = all_goals[29].get();
                 add_bl = 8;
                 break;
             case 11:
                 add_bl = 9;
                 break;
             case 13:
-                tiles[i]->goals[1] = all_goals[46];
+                tiles[i]->goals[1] = all_goals[46].get();
                 add_bl = 8;
                 break;
             case 16:
@@ -176,20 +176,20 @@ void Board::link_goals() {
         }
 
         if (tiles[i]->get_top()) {  // if tile above exists
-            tiles[i]->goals[0] = all_goals[tiles[i]->get_top()->goals[5]->get_pos()];  // top goal is bottom goal of tile above
+            tiles[i]->goals[0] = all_goals[tiles[i]->get_top()->goals[5]->get_pos()].get();  // top goal is bottom goal of tile above
         }
         if (tiles[i]->get_top_left()) {  // if tile in top left exists
-            tiles[i]->goals[1] = all_goals[tiles[i]->get_top_left()->goals[4]->get_pos()];  // top left goal is bottom right goal of top left tile
+            tiles[i]->goals[1] = all_goals[tiles[i]->get_top_left()->goals[4]->get_pos()].get();  // top left goal is bottom right goal of top left tile
         }
 
-        tiles[i]->goals[2] = all_goals[tiles[i]->goals[1]->get_pos() + 1];  // top right goal is top left goal + 1
-        tiles[i]->goals[3] = all_goals[tiles[i]->goals[1]->get_pos() + add_bl];  // bottom left goal is top left goal + add_bl
-        tiles[i]->goals[4] = all_goals[tiles[i]->goals[3]->get_pos() + 1];  // bottom right goal is bottom left goal + 1
-        tiles[i]->goals[5] = all_goals[tiles[i]->goals[0]->get_pos() + add_b];  // bottom goal is top goal + add_b
+        tiles[i]->goals[2] = all_goals[tiles[i]->goals[1]->get_pos() + 1].get();  // top right goal is top left goal + 1
+        tiles[i]->goals[3] = all_goals[tiles[i]->goals[1]->get_pos() + add_bl].get();  // bottom left goal is top left goal + add_bl
+        tiles[i]->goals[4] = all_goals[tiles[i]->goals[3]->get_pos() + 1].get();  // bottom right goal is bottom left goal + 1
+        tiles[i]->goals[5] = all_goals[tiles[i]->goals[0]->get_pos() + add_b].get();  // bottom goal is top goal + add_b
 
         for (Goal *&g : tiles[i]->goals) {  // set tile pointer in every goal on current tile to current tile
             if (!g->get_tile()) {  // tile pointer of g is not already pointing to a tile
-                g->set_tile(tiles[i]);
+                g->set_tile(tiles[i].get());
             }
         }
     }
@@ -276,13 +276,13 @@ void Board::initialize_tiles(int seed, bool with_seed) {
         // if the random resource is Netflix, set the die_value to 0, indicating there is no value to get resource
         int die_value = resource == Resources::NETFLIX ? 7 : die_values[randomized_die_idx[j]];
 
-        Tile *curr_tile = new Tile{resource, i, die_value, this};
+        std::unique_ptr<Tile> curr_tile{new Tile{resource, i, die_value, this}};
         if (die_value == 7) {
-            goose_tile = curr_tile;
+            goose_tile = curr_tile.get();
             curr_tile->has_goose = true;
             j--;
         }
-        tiles[i] = curr_tile;
+        tiles[i] = std::move(curr_tile); // make sure this works
 
         i++;
         j++;
@@ -305,15 +305,15 @@ void Board::get_board(const std::string &filename, int line_num) {
         int roll_val = 0;
         iss >> resource_num >> roll_val;
 
-        Tile *curr_tile = new Tile{NumToResource(resource_num), i, roll_val, this};
-        tiles[i] = curr_tile;
+        std::unique_ptr<Tile> curr_tile{new Tile{NumToResource(resource_num), i, roll_val, this}};
+        tiles[i] = std::move(curr_tile); // make sure this works with owneership
     }
     std::getline(ifs, line);
     std::istringstream iss2{line};
     int goose = 0;
     iss2 >> goose;
 
-    goose_tile = tiles[goose];
+    goose_tile = tiles[goose].get();
     goose_tile->has_goose = true;
 }
 
