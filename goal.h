@@ -19,6 +19,7 @@ class Goal : public Asset {
         
         Tile *get_tile();
         void set_tile(Tile *t);
+
 };
 
 

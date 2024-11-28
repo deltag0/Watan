@@ -17,3 +17,16 @@ bool Criterion::in_the_way(const Player *player) const {
 
     return true;
 }
+
+char level_to_building(int level) {
+    switch(level) {
+        case 0:
+            return 'A';
+        case 1:
+            return 'M';
+        case 2:
+            return 'E';
+    }
+
+    return ' ';
+}

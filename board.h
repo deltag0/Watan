@@ -56,6 +56,9 @@ class Board {
         void link_goals();
 };
 
+#define MAX_TILES 19
+#define MAX_RESOURCE_LENGTH 8
+
 // Available resources
 enum class Resources {
     CAFFEINE,

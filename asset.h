@@ -21,6 +21,7 @@ class Asset {
         int get_pos();
         std::string get_display();
         const Player *get_player() const;
+        void set_display(std::string &s);
         void set_player(Player *player);
 };
 

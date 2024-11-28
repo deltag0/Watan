@@ -1,6 +1,6 @@
 #include "asset.h"
 
-Asset::Asset(int pos) : pos{pos}, display{std::to_string(pos)}, tile{nullptr}, owner{nullptr} {}
+Asset::Asset(int pos) : pos{pos}, tile{nullptr}, owner{nullptr} {display = (pos < 10) ? (" " + std::to_string(pos)) : std::to_string(pos);}
 
 Asset::~Asset() {}
 
@@ -10,6 +10,6 @@ std::string Asset::get_display() {return display;}
 
 const Player *Asset::get_player() const {return owner;}
 
-void Asset::set_player(Player *player) {
-    owner = player;
-}
+void Asset::set_display(std::string &s) {display = s;}
+
+void Asset::set_player(Player *player) {owner = player;}

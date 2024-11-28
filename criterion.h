@@ -26,10 +26,12 @@ class Criterion : public Asset {
         void set_level(int l);
         int get_level() const;
 
+
         // returns false if the Criterion is owned by player or if the Criterion is not owned yet
         bool in_the_way(const Player *player) const;
 };
 
+char level_to_building(int level);
 
 #endif
 

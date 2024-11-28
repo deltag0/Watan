@@ -16,7 +16,7 @@ using std::vector;
 using std::cin;
 using std::string;
 
-Game_Controller::Game_Controller(Board &b, string filename, bool load): board{b}, 
+Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load): board{b}, view{v},
 p_list{Player {'B', "Blue", 0},
         Player {'R', "Red", 1},
         Player {'O', "Orange", 2},
@@ -104,6 +104,8 @@ void Game_Controller::start_game() {
         }
 
         board.get_criteria()[pos]->set_player(&(p_list[i]));
+        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
     }
 
@@ -119,6 +121,8 @@ void Game_Controller::start_game() {
         }
         
         board.get_criteria()[pos]->set_player(&(p_list[i]));
+        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
         p_list[i].owned_criterions.insert(pos);
     }
 }
@@ -145,7 +149,7 @@ string Game_Controller::check_command(const string &command) {
     }
     
     if (first == "board") {
-        // print board;
+        view.display(board);
     }
     else if (first == "status") {
         int save_turn = turn;
@@ -187,6 +191,8 @@ string Game_Controller::check_command(const string &command) {
         
         p_list[turn].owned_goal.insert(pos);
         board.get_goals()[pos]->set_player(&(p_list[turn]));
+        string s = string{p_list[turn].color} + "A";
+        board.get_goals()[pos]->set_display(s);
     }
     else if (first == "complete") {
         int pos;
@@ -208,6 +214,9 @@ string Game_Controller::check_command(const string &command) {
 
         p_list[turn].owned_criterions.insert(pos);
         board.get_criteria()[pos]->set_player(&(p_list[turn]));
+        string s = string{p_list[turn].color} + "A";
+        board.get_criteria()[pos]->set_display(s);
+        ++p_list[turn].points;
     }
     else if (first == "improve") {
         int pos;
@@ -219,12 +228,15 @@ string Game_Controller::check_command(const string &command) {
             return invalid_command(invalid_place);
         }
 
+        string s = board.get_criteria()[pos]->get_display();
+
         switch (board.get_criteria()[pos]->get_level()) {
             case 0:
                 if (p_list[turn].lecture_count < 2 || p_list[turn].study_count < 3) return invalid_command(invalid_resources);
                 
                 p_list[turn].lecture_count -= 2;
                 p_list[turn].study_count -= 3;
+                s = string{p_list[turn].color} + "M";
                 break;
             case 1:
                 if (p_list[turn].caffeine_count < 3
@@ -238,9 +250,11 @@ string Game_Controller::check_command(const string &command) {
                 p_list[turn].lecture_count -= 2;
                 --p_list[turn].tutorial_count;
                 p_list[turn].study_count -= 2;
+                s = string{p_list[turn].color} + "E";
                 break;
         }
         board.get_criteria()[pos]->increase_level();
+        board.get_criteria()[pos]->set_display(s);
         ++p_list[turn].points;
     }
     else if (first == "trade") {
@@ -950,6 +964,8 @@ void Game_Controller::load_player(const string &data, int idx) {
     while (std::isdigit(curr[0])) {
         p.owned_goal.insert(std::stoi(curr));
         board.get_goals()[std::stoi(curr)]->set_player(&p);
+        string display = string{p.color} + "A";
+        board.get_goals()[std::stoi(curr)]->set_display(display);
         iss >> curr;
     }
 
@@ -957,8 +973,12 @@ void Game_Controller::load_player(const string &data, int idx) {
         int curr_criterion = std::stoi(curr);
         p.owned_criterions.insert(curr_criterion);
         board.get_criteria()[curr_criterion]->set_player(&p);
+
         iss >> curr;
         int level = std::stoi(curr) - 1;
+
+        string display = string(1, p.color) + level_to_building(level);
+        board.get_criteria()[curr_criterion]->set_display(display);
 
         p.points += level + 1;
         board.get_criteria()[curr_criterion]->set_level(level);
