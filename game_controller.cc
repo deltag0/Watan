@@ -76,7 +76,6 @@ bool Game_Controller::play() {
         while (curr != "next") {
             cout << '>';
             std::getline(cin, curr);
-            cout << curr << '\n';
             if (cin.eof()) {
                 save_game("backup.sv");
                 exit(0);
@@ -337,7 +336,6 @@ string Game_Controller::check_command(const string &command) {
     } else
         return invalid_command(invalid_message);
 
-    // cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return first;
 }
 
@@ -418,7 +416,6 @@ string Game_Controller::invalid_command(const string &message) {
         exit(0);
     }
 
-    // cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return check_command(new_command);
 }
 
@@ -429,19 +426,27 @@ int Game_Controller::roll_dice() const {
         std::uniform_int_distribution<int> dist(2, 12);
         return dist(rng);
     } else {
-        int roll = 2;
+        int roll = 0;
+
+        string line = "";
 
         cout << "Input a roll between 2 and 12: ";
 
-        while (!(cin >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
+        std::getline(cin, line);
+
+        std::istringstream iss{line};
+
+        while (!(iss >> roll) || roll > MAX_ROLL || roll < MIN_ROLL) {  // while invalid roll
             if (cin.eof()) {
                 save_game("backup.sv");
                 exit(0);
             }
             cout << "Invalid roll.\n";
             cout << "Input a roll between 2 and 12: ";
-            cin.clear();
-            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            iss.clear();
+            std::getline(cin, line);
+            iss.str(line);
         }
 
         return roll;
@@ -449,22 +454,24 @@ int Game_Controller::roll_dice() const {
 }
 
 int Game_Controller::get_criterion() const {
+    string line = "";
     int pos = 0;
 
+
     cout << '>';
-    if (!(cin >> pos) || pos < 0 || pos >= MAX_CRITERION) {
+    std::getline(cin, line);
+    std::istringstream iss{line};
+
+    if (!(iss >> pos) || pos < 0 || pos >= MAX_CRITERION) {
         if (cin.eof()) {
             save_game("backup.sv");
             exit(0);
         }
-        if (cin) cout << invalid_place << '\n';
+        if (iss) cout << invalid_place << '\n';
         else cout << invalid_message << '\n';
-        cin.clear();
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return get_criterion();
     }
 
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return pos;
 }
 
@@ -734,17 +741,17 @@ void Game_Controller::move_geese() {
     string line = "";
     cout << '>';
 
-    for (int i = 0; i < MAX_TILES; i++) {
-        assert(board.get_tiles()[i]);
-    }
+    std::getline(cin, line);
 
-    while (!(cin >> location) || tile_error(location) || goose_error(location)) {
+    std::istringstream iss{line};
+
+    while (!(iss >> location) || tile_error(location) || goose_error(location)) {
         if (cin.eof()) {
             save_game("backup.sv");
             exit(0);
         }
         // if input went through, then specify error message
-        if (cin) {
+        if (iss) {
             if (tile_error(location))
                 cout << invalid_place << '\n';
             else
@@ -753,8 +760,9 @@ void Game_Controller::move_geese() {
         else cout << invalid_message << '\n';
 
         cout << '>';
-        cin.clear();
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        iss.clear();
+        std::getline(cin, line);
+        iss.str(line);
     }
 
     board.set_goose(board.get_tiles()[location].get());
@@ -867,14 +875,13 @@ void Game_Controller::steal(int location) {
     cout << "Choose a student to steal from.\n";
     cout << '>';
 
-    while (!(cin >> student_to_steal) || !is_color(student_to_steal) || players_on_map[color_to_name(student_to_steal)] == 0) {
+    while (!(std::getline(cin, student_to_steal)) || !is_color(student_to_steal) || players_on_map[color_to_name(student_to_steal)] == 0) {
         if (cin.eof()) {
             save_game("backup.sv");
             exit(0);
         }
         cout << invalid_student << '\n';
         cin.clear();
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cout << '>';
     }
 

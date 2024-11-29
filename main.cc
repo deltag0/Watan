@@ -27,7 +27,28 @@ int main(int argc, char *argv[]) {
     bool load = false;
 
     // handling CLI arguments
-    int i = 0;
+    int i = 1;
+
+    try {
+        if (argc > 3) {
+            throw std::invalid_argument("You cannot use multiple flags\n");
+        }
+        else if (argc == 2) {
+            throw std::invalid_argument("Not enough arguments provided. Perhaps you forgot the seed/filename\n");
+        }
+        else if (argc == 3) {
+            string command = argv[1];
+            if (command != "-seed" && command != "-load" && command != "-board") {
+                throw std::invalid_argument("Invalid command\n");
+            }
+        }
+
+    }
+    catch (const std::invalid_argument &e) {
+        std::cerr << e.what();
+        exit(1);
+    }
+
     while (i < argc) {
         string arg = argv[i];
 
@@ -39,9 +60,14 @@ int main(int argc, char *argv[]) {
                 seed = std::stoi(num);
                 is_seed = true;
             }
-            catch(const std::exception& e)
+            catch(const std::out_of_range& e)
             {
-                std::cerr << e.what() << '\n';
+                std::cerr << "Invalid seed" << '\n';
+                exit(1);
+            }
+            catch (const std::invalid_argument &e) {
+                std::cerr << "Seed must be an integer" << '\n';
+                exit(1);
             }
         }
         else if (arg == "-load") {
@@ -50,10 +76,16 @@ int main(int argc, char *argv[]) {
             {
                 filename = argv[i];
                 load = true;
+
+                std::ifstream ifs{filename};
+
+                if (!ifs) throw std::runtime_error("File does not exist");
+
             }
-            catch(const std::exception& e)
+            catch(const std::runtime_error &e)
             {
                 std::cerr << e.what() << '\n';
+                exit(1);
             }
         }
         else if (arg == "-board") {
@@ -61,12 +93,18 @@ int main(int argc, char *argv[]) {
             try
             {
                 filename = argv[i];
+                std::ifstream ifs{filename};
+                
+                if (!ifs) throw std::runtime_error("File does not exist");
+
             }
-            catch(const std::exception& e)
+            catch(const std::runtime_error &e)
             {
                 std::cerr << e.what() << '\n';
+                exit(1);
             }
         }
+
         i++;
     }
 
