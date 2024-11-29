@@ -1,10 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <vector>
 #include <iostream>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "board.h"
 #include "criterion.h"
@@ -19,7 +19,8 @@ enum class Dice {
     FAIR
 };
 
-struct Player: public Observer {
+class Player : public Observer {
+   public:
     // student color
     char color;
     std::string name;
@@ -27,11 +28,11 @@ struct Player: public Observer {
 
     // resources
     int points = 0;
-    int caffeine_count = 20;
-    int lab_count = 20;
-    int lecture_count = 20;
-    int study_count = 20;
-    int tutorial_count = 20;
+    int caffeine_count = 0;
+    int lab_count = 0;
+    int lecture_count = 0;
+    int study_count = 0;
+    int tutorial_count = 0;
 
     Dice die;
 
@@ -49,10 +50,10 @@ struct Player: public Observer {
 
     void notify() override;
 
-    private:
-        Player(char color, std::string name, int idx);
+   private:
+    Player(char color, std::string name, int idx);
 
-        friend class Game_Controller;
+    friend class Game_Controller;
 };
 
 // override operator to display status of player
