@@ -27,11 +27,11 @@ struct Player: public Observer {
 
     // resources
     int points = 0;
-    int caffeine_count = 20;
-    int lab_count = 20;
-    int lecture_count = 20;
-    int study_count = 20;
-    int tutorial_count = 20;
+    int caffeine_count = 0;
+    int lab_count = 0;
+    int lecture_count = 0;
+    int study_count = 0;
+    int tutorial_count = 0;
 
     Dice die;
 
