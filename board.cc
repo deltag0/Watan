@@ -306,7 +306,7 @@ void Board::get_board(const std::string &filename, int line_num) {
         iss >> resource_num >> roll_val;
 
         std::unique_ptr<Tile> curr_tile{new Tile{NumToResource(resource_num), i, roll_val, this}};
-        tiles[i] = std::move(curr_tile); // make sure this works with owneership
+        tiles[i] = std::move(curr_tile); // make sure this works with ownership
     }
     std::getline(ifs, line);
     std::istringstream iss2{line};
@@ -365,8 +365,8 @@ bool Board::can_achieve(int pos, Player player) const {
 }
 
 bool Board::check_goal_0(Tile *tile, Player &player) const {
-    Tile *topright = tile->get_top_right();
-    Tile *topleft = tile->get_top_left();
+    const Tile *topright = tile->get_top_right();
+    const Tile *topleft = tile->get_top_left();
 
     bool in_the_way_right = tile->get_criteria()[1]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[0]->in_the_way(&player);
@@ -386,8 +386,8 @@ bool Board::check_goal_0(Tile *tile, Player &player) const {
 }
 
 bool Board::check_goal_1(Tile *tile, Player &player) const {
-    Tile *top = tile->get_top();
-    Tile *botleft = tile->get_bot_left();
+    const Tile *top = tile->get_top();
+    const Tile *botleft = tile->get_bot_left();
 
     bool in_the_way_right = tile->get_criteria()[0]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[2]->in_the_way(&player);
@@ -407,8 +407,8 @@ bool Board::check_goal_1(Tile *tile, Player &player) const {
 }
 
 bool Board::check_goal_2(Tile *tile, Player &player) const {
-    Tile *top = tile->get_top();
-    Tile *botright = tile->get_bot_right();
+    const Tile *top = tile->get_top();
+    const Tile *botright = tile->get_bot_right();
 
     bool in_the_way_right = tile->get_criteria()[3]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[1]->in_the_way(&player);
@@ -428,8 +428,8 @@ bool Board::check_goal_2(Tile *tile, Player &player) const {
 }
 
 bool Board::check_goal_3(Tile *tile, Player &player) const {
-    Tile *botleft = tile->get_bot_left();
-    Tile *topleft = tile->get_top_left();
+    const Tile *botleft = tile->get_bot_left();
+    const Tile *topleft = tile->get_top_left();
 
     bool in_the_way_right = tile->get_criteria()[4]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[2]->in_the_way(&player);
@@ -449,8 +449,8 @@ bool Board::check_goal_3(Tile *tile, Player &player) const {
 }
 
 bool Board::check_goal_4(Tile *tile, Player &player) const {
-    Tile *topright = tile->get_top_right();
-    Tile *botright = tile->get_bot_right();
+    const Tile *topright = tile->get_top_right();
+    const Tile *botright = tile->get_bot_right();
 
     bool in_the_way_right = tile->get_criteria()[3]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[5]->in_the_way(&player);
@@ -470,8 +470,8 @@ bool Board::check_goal_4(Tile *tile, Player &player) const {
 }
 
 bool Board::check_goal_5(Tile *tile, Player &player) const {
-    Tile *botright = tile->get_bot_right();
-    Tile *botleft = tile->get_bot_left();
+    const Tile *botright = tile->get_bot_right();
+    const Tile *botleft = tile->get_bot_left();
 
     bool in_the_way_right = tile->get_criteria()[5]->in_the_way(&player);
     bool in_the_way_left = tile->get_criteria()[4]->in_the_way(&player);
@@ -521,9 +521,9 @@ bool Board::can_complete(const int pos, const bool sot, Player &player) const {
 }
 
 bool Board::check_complete_0(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *topleft = tile->get_top_left();
-    Tile *top = tile->get_top();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *topleft = tile->get_top_left();
+    const Tile *top = tile->get_top();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !(tile->get_criteria()[1]->get_player()) && !tile->get_criteria()[2]->get_player();
@@ -546,9 +546,9 @@ bool Board::check_complete_0(const int pos, const bool sot, Player &player) cons
 }
 
 bool Board::check_complete_1(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *topright = tile->get_top_right();
-    Tile *top = tile->get_top();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *topright = tile->get_top_right();
+    const Tile *top = tile->get_top();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !tile->get_criteria()[0]->get_player() && !tile->get_criteria()[3]->get_player();
@@ -571,9 +571,9 @@ bool Board::check_complete_1(const int pos, const bool sot, Player &player) cons
 }
 
 bool Board::check_complete_2(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *botleft = tile->get_bot_left();
-    Tile *topleft = tile->get_top_left();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *botleft = tile->get_bot_left();
+    const Tile *topleft = tile->get_top_left();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !tile->get_criteria()[0]->get_player() && !tile->get_criteria()[4]->get_player();
@@ -596,9 +596,9 @@ bool Board::check_complete_2(const int pos, const bool sot, Player &player) cons
 }
 
 bool Board::check_complete_3(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *botright = tile->get_bot_right();
-    Tile *topright = tile->get_top_right();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *botright = tile->get_bot_right();
+    const Tile *topright = tile->get_top_right();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !tile->get_criteria()[1]->get_player() && !tile->get_criteria()[5]->get_player();
@@ -621,9 +621,9 @@ bool Board::check_complete_3(const int pos, const bool sot, Player &player) cons
 }
 
 bool Board::check_complete_4(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *botleft = tile->get_bot_left();
-    Tile *bot = tile->get_bot();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *botleft = tile->get_bot_left();
+    const Tile *bot = tile->get_bot();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !tile->get_criteria()[2]->get_player() && !tile->get_criteria()[5]->get_player();
@@ -646,9 +646,9 @@ bool Board::check_complete_4(const int pos, const bool sot, Player &player) cons
 }
 
 bool Board::check_complete_5(const int pos, const bool sot, Player &player) const {
-    Tile *tile = all_criteria[pos]->get_tile();
-    Tile *botright = tile->get_bot_right();
-    Tile *bot = tile->get_bot();
+    const Tile *tile = all_criteria[pos]->get_tile();
+    const Tile *botright = tile->get_bot_right();
+    const Tile *bot = tile->get_bot();
 
     // check if adjacent criteria on same tile are not completed
     bool can_complete = !tile->get_criteria()[3]->get_player() && !tile->get_criteria()[4]->get_player();

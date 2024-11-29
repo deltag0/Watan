@@ -53,7 +53,6 @@ struct Player: public Observer {
         Player(char color, std::string name, int idx);
 
         friend class Game_Controller;
-
 };
 
 // override operator to display status of player

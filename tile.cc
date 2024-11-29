@@ -13,7 +13,7 @@ const std::vector<Criterion *> &Tile::get_criteria() const {return criteria;}
 
 const std::vector<Goal *> &Tile::get_goals() const {return goals;}
 
-Tile* Tile::get_bot() const {
+const Tile* Tile::get_bot() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 13 || pos == 16 || pos == 18 || pos == 17 || pos == 15) return nullptr;
 
@@ -22,7 +22,7 @@ Tile* Tile::get_bot() const {
     return tiles[pos + 5].get();
 }
 
-Tile* Tile::get_top() const {
+const Tile* Tile::get_top() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 3 || pos == 1 || pos == 0 || pos == 2 || pos == 5) return nullptr;
 
@@ -32,7 +32,7 @@ Tile* Tile::get_top() const {
     return tiles[pos - 5].get();
 }
 
-Tile* Tile::get_bot_left() const {
+const Tile* Tile::get_bot_left() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 3 || pos == 8 || pos == 13 || pos == 16 || pos == 18) return nullptr;
 
@@ -41,7 +41,7 @@ Tile* Tile::get_bot_left() const {
     return tiles[pos + 2].get();
 }
 
-Tile* Tile::get_top_left() const {
+const Tile* Tile::get_top_left() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 0 || pos == 1 || pos == 3 || pos == 8 || pos == 13) return nullptr;
 
@@ -50,7 +50,7 @@ Tile* Tile::get_top_left() const {
     return tiles[pos - 3].get();
 }
 
-Tile* Tile::get_top_right() const {
+const const Tile* Tile::get_top_right() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 0 || pos == 2 || pos == 5 || pos == 10 || pos == 15) return nullptr;
 
@@ -59,7 +59,7 @@ Tile* Tile::get_top_right() const {
     return tiles[pos - 2].get();
 }
 
-Tile* Tile::get_bot_right() const {
+const Tile* Tile::get_bot_right() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 17 || pos == 18 || pos == 5 || pos == 10 || pos == 15) return nullptr;
 

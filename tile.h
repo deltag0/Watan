@@ -33,12 +33,12 @@ class Tile {
         // get tile resource
         Resources get_resource() const;
 
-        Tile* get_bot() const;
-        Tile* get_top() const;
-        Tile* get_bot_left() const;
-        Tile* get_top_left() const;
-        Tile* get_top_right() const;
-        Tile* get_bot_right() const;
+        const Tile* get_bot() const;
+        const Tile* get_top() const;
+        const Tile* get_bot_left() const;
+        const Tile* get_top_left() const;
+        const Tile* get_top_right() const;
+        const Tile* get_bot_right() const;
 
         // functions for print
         std::string display_resource() const;
