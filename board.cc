@@ -364,7 +364,7 @@ bool Board::can_achieve(int pos, Player player) const {
     }
 }
 
-bool Board::check_goal_0(Tile *tile, Player player) const {
+bool Board::check_goal_0(Tile *tile, Player &player) const {
     Tile *topright = tile->get_top_right();
     Tile *topleft = tile->get_top_left();
 
@@ -385,7 +385,7 @@ bool Board::check_goal_0(Tile *tile, Player player) const {
     return false;
 }
 
-bool Board::check_goal_1(Tile *tile, Player player) const {
+bool Board::check_goal_1(Tile *tile, Player &player) const {
     Tile *top = tile->get_top();
     Tile *botleft = tile->get_bot_left();
 
@@ -406,7 +406,7 @@ bool Board::check_goal_1(Tile *tile, Player player) const {
     return false;
 }
 
-bool Board::check_goal_2(Tile *tile, Player player) const {
+bool Board::check_goal_2(Tile *tile, Player &player) const {
     Tile *top = tile->get_top();
     Tile *botright = tile->get_bot_right();
 
@@ -427,7 +427,7 @@ bool Board::check_goal_2(Tile *tile, Player player) const {
     return false;
 }
 
-bool Board::check_goal_3(Tile *tile, Player player) const {
+bool Board::check_goal_3(Tile *tile, Player &player) const {
     Tile *botleft = tile->get_bot_left();
     Tile *topleft = tile->get_top_left();
 
@@ -448,7 +448,7 @@ bool Board::check_goal_3(Tile *tile, Player player) const {
     return false;
 }
 
-bool Board::check_goal_4(Tile *tile, Player player) const {
+bool Board::check_goal_4(Tile *tile, Player &player) const {
     Tile *topright = tile->get_top_right();
     Tile *botright = tile->get_bot_right();
 
@@ -469,7 +469,7 @@ bool Board::check_goal_4(Tile *tile, Player player) const {
     return false;
 }
 
-bool Board::check_goal_5(Tile *tile, Player player) const {
+bool Board::check_goal_5(Tile *tile, Player &player) const {
     Tile *botright = tile->get_bot_right();
     Tile *botleft = tile->get_bot_left();
 
@@ -488,6 +488,186 @@ bool Board::check_goal_5(Tile *tile, Player player) const {
     }
     
     return false;
+}
+
+bool Board::can_complete(const int pos, const bool sot, Player &player) const {
+    // if criterion pos is already owned, then false
+    if (all_criteria[pos]->get_player()) return false;
+
+    int pos_on_tile = -1;
+    Tile *tile = all_criteria[pos]->get_tile();
+
+    // get position on tile
+    for (int i = 0; i < CORNERS; ++i) {
+        if (tile->get_criteria()[i]->get_pos() == pos) {
+            pos_on_tile = i;
+        }
+    }
+
+    switch (pos_on_tile) {
+        case 0:
+            return check_complete_0(pos, sot, player);
+        case 1:
+            return check_complete_1(pos, sot, player);
+        case 2:
+            return check_complete_2(pos, sot, player);
+        case 3:
+            return check_complete_3(pos, sot, player);
+        case 4:
+            return check_complete_4(pos, sot, player);
+        case 5:
+            return check_complete_5(pos, sot, player);
+    }
+}
+
+bool Board::check_complete_0(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *topleft = tile->get_top_left();
+    Tile *top = tile->get_top();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !(tile->get_criteria()[1]->get_player()) && !tile->get_criteria()[2]->get_player();
+
+    // check if same tile is good and adjacent criterion on other tile is not completed
+    if (can_complete && topleft)
+        can_complete = !topleft->get_criteria()[1]->get_player();
+    else if (can_complete && top)
+        can_complete = !top->get_criteria()[2]->get_player();
+
+    // if not start of turn and still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[0]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[1]->get_pos()) || 
+                       (topleft && player.owns_goal(topleft->get_goals()[2]->get_pos())) || 
+                       (top && player.owns_goal(top->get_goals()[3]->get_pos()));
+    }
+
+    return can_complete;
+}
+
+bool Board::check_complete_1(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *topright = tile->get_top_right();
+    Tile *top = tile->get_top();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !tile->get_criteria()[0]->get_player() && !tile->get_criteria()[3]->get_player();
+
+    // check if same tile is good and adjacent criterion on other tile is not completed
+    if (can_complete && topright)
+        can_complete = !topright->get_criteria()[0]->get_player();
+    else if (can_complete && top)
+        can_complete = !top->get_criteria()[3]->get_player();
+
+    // if not start of turn and still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[0]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[2]->get_pos()) || 
+                       (topright && player.owns_goal(topright->get_goals()[1]->get_pos())) || 
+                       (top && player.owns_goal(top->get_goals()[4]->get_pos()));
+    }
+
+    return can_complete;
+}
+
+bool Board::check_complete_2(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *botleft = tile->get_bot_left();
+    Tile *topleft = tile->get_top_left();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !tile->get_criteria()[0]->get_player() && !tile->get_criteria()[4]->get_player();
+
+    // if still good, check if adjacent criterion on other tile is not completed
+    if (can_complete && botleft)
+        can_complete = !botleft->get_criteria()[0]->get_player();
+    else if (can_complete && topleft)
+        can_complete = !topleft->get_criteria()[4]->get_player();
+
+    // if not start of turn and is still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[1]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[3]->get_pos()) || 
+                       (botleft && player.owns_goal(botleft->get_goals()[0]->get_pos())) || 
+                       (topleft && player.owns_goal(topleft->get_goals()[5]->get_pos()));
+    }
+
+    return can_complete;
+}
+
+bool Board::check_complete_3(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *botright = tile->get_bot_right();
+    Tile *topright = tile->get_top_right();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !tile->get_criteria()[1]->get_player() && !tile->get_criteria()[5]->get_player();
+
+    // if still good, check if adjacent criterion on other tile is not completed
+    if (can_complete && botright)
+        can_complete = !botright->get_criteria()[1]->get_player();
+    else if (can_complete && topright)
+        can_complete = !topright->get_criteria()[5]->get_player();
+
+    // if not start of turn and still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[2]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[4]->get_pos()) || 
+                       (botright && player.owns_goal(botright->get_goals()[0]->get_pos())) || 
+                       (topright && player.owns_goal(topright->get_goals()[5]->get_pos()));
+    }
+
+    return can_complete;
+}
+
+bool Board::check_complete_4(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *botleft = tile->get_bot_left();
+    Tile *bot = tile->get_bot();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !tile->get_criteria()[2]->get_player() && !tile->get_criteria()[5]->get_player();
+
+    // if still good, check if adjacent criterion on other tile is not completed
+    if (can_complete && botleft)
+        can_complete = !botleft->get_criteria()[5]->get_player();
+    else if (can_complete && bot)
+        can_complete = !bot->get_criteria()[2]->get_player();
+
+    // if not start of turn and still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[3]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[5]->get_pos()) || 
+                       (botleft && player.owns_goal(botleft->get_goals()[4]->get_pos())) || 
+                       (bot && player.owns_goal(bot->get_goals()[1]->get_pos()));
+    }
+
+    return can_complete;
+}
+
+bool Board::check_complete_5(const int pos, const bool sot, Player &player) const {
+    Tile *tile = all_criteria[pos]->get_tile();
+    Tile *botright = tile->get_bot_right();
+    Tile *bot = tile->get_bot();
+
+    // check if adjacent criteria on same tile are not completed
+    bool can_complete = !tile->get_criteria()[3]->get_player() && !tile->get_criteria()[4]->get_player();
+
+    // if still good, check if adjacent criterion on other tile is not completed
+    if (can_complete && botright)
+        can_complete = !botright->get_criteria()[4]->get_player();
+    else if (can_complete && bot)
+        can_complete = !bot->get_criteria()[3]->get_player();
+
+    // if not start of turn and still good, check if current player has completed adjacent goal
+    if (can_complete && !sot) {
+        can_complete = player.owns_goal(tile->get_goals()[4]->get_pos()) || 
+                       player.owns_goal(tile->get_goals()[5]->get_pos()) || 
+                       (botright && player.owns_goal(botright->get_goals()[3]->get_pos())) || 
+                       (bot && player.owns_goal(bot->get_goals()[2]->get_pos()));
+    }
+
+    return can_complete;
 }
 
 const Tile *Board::get_goose() const {return goose_tile;}

@@ -114,6 +114,9 @@ int main(int argc, char *argv[]) {
     Game_Controller controller{board, view, filename, load};
     bool play_again = controller.play();
     while (play_again) {  // play until user enters "no"
+        Board board{seed, false, filename, false};  // generate a new random board
+        Game_Controller controller{board, view, filename, false};
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         play_again = controller.play();
     }
 }

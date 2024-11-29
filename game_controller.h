@@ -79,15 +79,6 @@ class Game_Controller: public Subject {
         int get_criterion() const;
 
         Player *get_criterion_owner(const int pos);
-        bool can_complete(const int pos) const;
-
-        // helper functions for can_complete()
-        bool check_complete_0(const int pos) const;
-        bool check_complete_1(const int pos) const;
-        bool check_complete_2(const int pos) const;
-        bool check_complete_3(const int pos) const;
-        bool check_complete_4(const int pos) const;
-        bool check_complete_5(const int pos) const;
 };
 
 #endif
