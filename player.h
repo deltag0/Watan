@@ -8,6 +8,7 @@
 
 #include "board.h"
 #include "criterion.h"
+#include "observer.h"
 
 #define NUM_PLAYERS 4
 enum class Resources;
@@ -18,7 +19,7 @@ enum class Dice {
     FAIR
 };
 
-struct Player {
+struct Player: public Observer {
     // student color
     char color;
     std::string name;
@@ -45,6 +46,8 @@ struct Player {
 
     // returns true if player owns criterion
     bool owns_criterion(const int pos) const;
+
+    void notify() override;
 
     private:
         Player(char color, std::string name, int idx);

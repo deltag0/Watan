@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
             {
                 filename = argv[i];
                 std::ifstream ifs{filename};
-                
+
                 if (!ifs) throw std::runtime_error("File does not exist");
 
             }

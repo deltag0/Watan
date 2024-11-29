@@ -34,4 +34,3 @@ class Criterion : public Asset {
 char level_to_building(int level);
 
 #endif
-

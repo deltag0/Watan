@@ -8,6 +8,7 @@ using std::string;
 
 #include "board.h"
 #include "view.h"
+#include "subject.h"
 
 struct Player;
 
@@ -22,10 +23,9 @@ const string invalid_student = "Not a valid student";
 const string has_goose = "Tile already has goose";
 const string invalid_tile = "Not a valid tile";
 
-class Game_Controller {
+class Game_Controller: public Subject {
     Board &board;
     View &view;
-    Player p_list[NUM_PLAYERS];
 
     bool sot;  // True if it's the start of turn
     int turn;
@@ -53,7 +53,7 @@ class Game_Controller {
         void check_roll(const int roll);
 
         void remove_resource(const Resources name, Player &player);
-        void add_resource(const Resources name, Player &player);
+        void add_resource(const Resources name, Player &player, const Criterion *criterion);
 
         void move_geese();
         void resources_7();

@@ -20,6 +20,10 @@ bool Player::owns_criterion(const int pos) const {
     return false;
 }
 
+void Player::notify() {
+    std::cout << *this;
+}
+
 std::ostream &operator<<(std::ostream &out, Player player) {
     out << player.name << " has " << player.points << " victory points, "
     << player.caffeine_count << " caffeines, " << player.lab_count << " labs, "

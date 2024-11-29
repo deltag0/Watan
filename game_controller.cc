@@ -18,12 +18,13 @@ using std::cout;
 using std::string;
 using std::vector;
 
-Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load): board{b}, view{v},
-p_list{Player {'B', "Blue", 0},
-        Player {'R', "Red", 1},
-        Player {'O', "Orange", 2},
-        Player {'Y', "Yellow", 3}}, sot{true}, turn{0} 
+Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load): board{b}, view{v},sot{true}, turn{0} 
         {
+            attach(std::unique_ptr<Player>{new Player{'B', "Blue", 0}});
+            attach(std::unique_ptr<Player>{new Player{'R', "Red", 1}});
+            attach(std::unique_ptr<Player>{new Player{'O', "Orange", 2}});
+            attach(std::unique_ptr<Player>{new Player{'Y', "Yellow", 3}});
+
             if (load) {
                 std::ifstream ifs{filename};
                 string line = "";
@@ -32,7 +33,7 @@ p_list{Player {'B', "Blue", 0},
                 // extra line we need to get rid of
                 std::getline(ifs, line);
 
-                for (int i = 0; i < NUM_PLAYERS; i++) {
+                for (int i = 0; i < num_observers; i++) {
                     std::getline(ifs, line);
                     load_player(line, i);
                 }
@@ -106,9 +107,9 @@ bool Game_Controller::play() {
 }
 
 void Game_Controller::start_game() {
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < num_observers; i++) {
         int pos = 0;
-        cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
+        cout << "Student " << p_list[i]->name << ", where do you want to complete an Assignment?\n";
 
         pos = get_criterion();
 
@@ -117,16 +118,16 @@ void Game_Controller::start_game() {
             pos = get_criterion();
         }
 
-        board.get_criteria()[pos]->set_player(&(p_list[i]));
-        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_player(p_list[i].get());
+        string s = string{p_list[i]->color} + "A";
         board.get_criteria()[pos]->set_display(s);
-        p_list[i].owned_criterions.insert(pos);
-        ++p_list[i].points;
+        p_list[i]->owned_criterions.insert(pos);
+        ++(p_list[i]->points);
     }
 
-    for (int i = NUM_PLAYERS - 1; i >= 0; i--) {
+    for (int i = num_observers - 1; i >= 0; i--) {
         int pos = 0;
-        cout << "Student " << p_list[i].name << ", where do you want to complete an Assignment?\n";
+        cout << "Student " << p_list[i]->name << ", where do you want to complete an Assignment?\n";
 
         pos = get_criterion();
 
@@ -135,11 +136,11 @@ void Game_Controller::start_game() {
             pos = get_criterion();
         }
 
-        board.get_criteria()[pos]->set_player(&(p_list[i]));
-        string s = string{p_list[i].color} + "A";
+        board.get_criteria()[pos]->set_player(p_list[i].get());
+        string s = string{p_list[i]->color} + "A";
         board.get_criteria()[pos]->set_display(s);
-        p_list[i].owned_criterions.insert(pos);
-        ++p_list[i].points;
+        p_list[i]->owned_criterions.insert(pos);
+        ++(p_list[i]->points);
     }
 }
 
@@ -151,9 +152,9 @@ string Game_Controller::check_command(const string &command) {
 
     if (sot) {
         if (first == "load") {
-            p_list[turn].die = Dice::LOADED;
+            p_list[turn]->die = Dice::LOADED;
         } else if (first == "fair") {
-            p_list[turn].die = Dice::FAIR;
+            p_list[turn]->die = Dice::FAIR;
         } else if (first == "roll") {
             sot = false;
         } else
@@ -165,16 +166,10 @@ string Game_Controller::check_command(const string &command) {
     if (first == "board") {
         view.display(board);
     } else if (first == "status") {
-        int save_turn = turn;
-        turn = 0;
-        for (int i = 0; i < NUM_PLAYERS; i++) {
-            print_status();
-            turn++;
-        }
-        turn = save_turn;
+        notifyObservers();
     } else if (first == "criteria") {
         cout << "Student has completed the following criteria:";
-        for (auto criteria : p_list[turn].owned_criterions) {
+        for (auto criteria : p_list[turn]->owned_criterions) {
             cout << " " << criteria;
         }
         cout << std::endl;
@@ -189,22 +184,22 @@ string Game_Controller::check_command(const string &command) {
 
         if (pos < 0 || pos >= MAX_GOAL) return invalid_command(invalid_place);
 
-        bool can_achieve = board.can_achieve(pos, p_list[turn]);
+        bool can_achieve = board.can_achieve(pos, *p_list[turn]);
 
         if (!can_achieve) {
             return invalid_command(invalid_place);
         }
 
-        if (p_list[turn].study_count == 0 || p_list[turn].tutorial_count == 0) {
+        if (p_list[turn]->study_count == 0 || p_list[turn]->tutorial_count == 0) {
             return invalid_command(invalid_resources);
         }
 
-        p_list[turn].study_count--;
-        p_list[turn].tutorial_count--;
+        p_list[turn]->study_count--;
+        p_list[turn]->tutorial_count--;
 
-        p_list[turn].owned_goal.insert(pos);
-        board.get_goals()[pos]->set_player(&(p_list[turn]));
-        string s = string{p_list[turn].color} + "A";
+        p_list[turn]->owned_goal.insert(pos);
+        board.get_goals()[pos]->set_player(p_list[turn].get());
+        string s = string{p_list[turn]->color} + "A";
         board.get_goals()[pos]->set_display(s);
     } else if (first == "complete") {
         int pos;
@@ -214,26 +209,26 @@ string Game_Controller::check_command(const string &command) {
 
         if (pos < 0 || pos >= MAX_CRITERION || !can_complete(pos)) return invalid_command(invalid_place);
 
-        if (p_list[turn].caffeine_count < 1 || p_list[turn].lab_count < 1 || p_list[turn].lecture_count < 1 || p_list[turn].tutorial_count < 1) return invalid_command(invalid_resources);
+        if (p_list[turn]->caffeine_count < 1 || p_list[turn]->lab_count < 1 || p_list[turn]->lecture_count < 1 || p_list[turn]->tutorial_count < 1) return invalid_command(invalid_resources);
 
-        --p_list[turn].caffeine_count;
-        --p_list[turn].lab_count;
-        --p_list[turn].lecture_count;
-        --p_list[turn].tutorial_count;
+        --p_list[turn]->caffeine_count;
+        --p_list[turn]->lab_count;
+        --p_list[turn]->lecture_count;
+        --p_list[turn]->tutorial_count;
 
-        p_list[turn].owned_criterions.insert(pos);
-        board.get_criteria()[pos]->set_player(&(p_list[turn]));
-        string s = string{p_list[turn].color} + "A";
+        p_list[turn]->owned_criterions.insert(pos);
+        board.get_criteria()[pos]->set_player(p_list[turn].get());
+        string s = string{p_list[turn]->color} + "A";
         board.get_criteria()[pos]->set_display(s);
-        ++p_list[turn].points;
-        if (p_list[turn].points == 10) return "next";  // ends the game 
+        ++p_list[turn]->points;
+        if (p_list[turn]->points == 10) return "next";  // ends the game 
     } else if (first == "improve") {
         int pos;
         if (!(iss >> pos)) {
             return invalid_command(invalid_message);
         }
 
-        if (pos < 0 || pos >= MAX_CRITERION || !p_list[turn].owns_criterion(pos) || board.get_criteria()[pos]->get_level() > 1) {
+        if (pos < 0 || pos >= MAX_CRITERION || !p_list[turn]->owns_criterion(pos) || board.get_criteria()[pos]->get_level() > 1) {
             return invalid_command(invalid_place);
         }
 
@@ -241,38 +236,38 @@ string Game_Controller::check_command(const string &command) {
 
         switch (board.get_criteria()[pos]->get_level()) {
             case 0:
-                if (p_list[turn].lecture_count < 2 || p_list[turn].study_count < 3) return invalid_command(invalid_resources);
+                if (p_list[turn]->lecture_count < 2 || p_list[turn]->study_count < 3) return invalid_command(invalid_resources);
 
-                p_list[turn].lecture_count -= 2;
-                p_list[turn].study_count -= 3;
-                s = string{p_list[turn].color} + "M";
+                p_list[turn]->lecture_count -= 2;
+                p_list[turn]->study_count -= 3;
+                s = string{p_list[turn]->color} + "M";
                 break;
             case 1:
-                if (p_list[turn].caffeine_count < 3 || p_list[turn].lab_count < 2 || p_list[turn].lecture_count < 2 || p_list[turn].tutorial_count < 1 || p_list[turn].study_count < 2) return invalid_command(invalid_resources);
+                if (p_list[turn]->caffeine_count < 3 || p_list[turn]->lab_count < 2 || p_list[turn]->lecture_count < 2 || p_list[turn]->tutorial_count < 1 || p_list[turn]->study_count < 2) return invalid_command(invalid_resources);
 
-                p_list[turn].caffeine_count -= 3;
-                p_list[turn].lab_count -= 2;
-                p_list[turn].lecture_count -= 2;
-                --p_list[turn].tutorial_count;
-                p_list[turn].study_count -= 2;
-                s = string{p_list[turn].color} + "E";
+                p_list[turn]->caffeine_count -= 3;
+                p_list[turn]->lab_count -= 2;
+                p_list[turn]->lecture_count -= 2;
+                --p_list[turn]->tutorial_count;
+                p_list[turn]->study_count -= 2;
+                s = string{p_list[turn]->color} + "E";
                 break;
         }
         board.get_criteria()[pos]->increase_level();
         board.get_criteria()[pos]->set_display(s);
-        ++p_list[turn].points;
-        if (p_list[turn].points == 10) return "next";  // ends the game 
+        ++p_list[turn]->points;
+        if (p_list[turn]->points == 10) return "next";  // ends the game 
     } else if (first == "trade") {
         string ans = "";
         string partner = "";
         string give_resource = "";
         string take_resource = "";
-        if (!(iss >> partner >> give_resource >> take_resource) || !is_color(partner) || partner == p_list[turn].name || !is_resource(give_resource) || !is_resource(take_resource)) {
+        if (!(iss >> partner >> give_resource >> take_resource) || !is_color(partner) || partner == p_list[turn]->name || !is_resource(give_resource) || !is_resource(take_resource)) {
             return invalid_command(invalid_message);
         }
 
         Resources resource1 = StringToResource(give_resource);
-        int &p1_give_resource = p_list[turn].find_resources(resource1);
+        int &p1_give_resource = p_list[turn]->find_resources(resource1);
 
         if (p1_give_resource == 0) {
             return invalid_command(invalid_resources);
@@ -280,7 +275,7 @@ string Game_Controller::check_command(const string &command) {
 
         Resources resource2 = StringToResource(take_resource);
 
-        cout << p_list[turn].name << " offers " << partner << " one " << give_resource
+        cout << p_list[turn]->name << " offers " << partner << " one " << give_resource
              << " for one " << take_resource << ".\n"
              << "Does " << partner << " accept this offer?" << '\n';
 
@@ -302,10 +297,10 @@ string Game_Controller::check_command(const string &command) {
         }
 
         if (ans == "yes") {
-            int &p1_gain_resource = p_list[turn].find_resources(resource2);
+            int &p1_gain_resource = p_list[turn]->find_resources(resource2);
             int student2 = color_to_name(partner);
-            int &p2_give_resource = p_list[student2].find_resources(resource2);
-            int &p2_gain_resource = p_list[student2].find_resources(resource1);
+            int &p2_give_resource = p_list[student2]->find_resources(resource2);
+            int &p2_gain_resource = p_list[student2]->find_resources(resource1);
 
             p1_gain_resource++;
             p1_give_resource--;
@@ -315,7 +310,7 @@ string Game_Controller::check_command(const string &command) {
     } else if (first == "next") {
         sot = true;
         turn++;
-        if (turn == NUM_PLAYERS) turn = 0;
+        if (turn == num_observers) turn = 0;
     } else if (first == "save") {
         string filename = "";
         if (!(iss >> filename)) return invalid_command(invalid_message);
@@ -329,32 +324,38 @@ string Game_Controller::check_command(const string &command) {
              << " achieve <goal>\n"
              << " complete <criterion>\n"
              << " improve <criterion>\n"
-             << " trade <colour> <give> <take>\n"
+             << " trade <player> <give> <take>\n"
              << " next\n"
-             << " save <file>\n"
-             << " help" << std::endl;
-    } else
+             << " save <filename>\n"
+             << " help\n";
+    } else {
         return invalid_command(invalid_message);
+    }
 
     return first;
 }
 
+
 void Game_Controller::print_turn() const {
-    cout << "Student " << p_list[turn].name << "'s " << "turn." << std::endl;
+    cout << "Student " << p_list[turn]->name << "'s " << "turn." << std::endl;
 }
 
 bool Game_Controller::game_over() const {
-    return p_list[0].won() || p_list[1].won() || p_list[2].won() || p_list[3].won();
+    for (int i = 0; i < num_observers; i++) {
+        if (p_list[0]->won()) return true;
+    }
+
+    return false;
 }
 
 void Game_Controller::check_roll(const int roll) {
-    std::map<Resources, int[NUM_PLAYERS]> resources_gained;
+    std::map<Resources, vector<int>> resources_gained;
     bool gained = false;
 
     for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
                                Resources::STUDY, Resources::TUTORIAL}) {
-        for (int i = 0; i < NUM_PLAYERS; i++) {
-            resources_gained[resource][i] = 0;
+        for (int i = 0; i < num_observers; i++) {
+            resources_gained[resource].push_back(0);
         }
     }
 
@@ -374,14 +375,14 @@ void Game_Controller::check_roll(const int roll) {
 
                 if (owner) {
                     gained = true;
-                    add_resource(tile->get_resource(), *owner);
-                    resources_gained[tile->get_resource()][owner->idx]++;
+                    add_resource(tile->get_resource(), *owner, criteria);
+                    resources_gained[tile->get_resource()][owner->idx] += criteria->get_level() + 1;
                 }
             }
         }
     }
 
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < num_observers; i++) {
         string output = "";
         for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
                                    Resources::STUDY, Resources::TUTORIAL}) {
@@ -392,7 +393,7 @@ void Game_Controller::check_roll(const int roll) {
             }
         }
         if (output != "") {
-            cout << "Student " << p_list[i].name << " gained:\n";
+            cout << "Student " << p_list[i]->name << " gained:\n";
             cout << output;
         }
     }
@@ -402,7 +403,7 @@ void Game_Controller::check_roll(const int roll) {
     }
 }
 
-void Game_Controller::print_status() const { cout << p_list[turn]; }
+void Game_Controller::print_status() const { cout << *p_list[turn]; }
 
 string Game_Controller::invalid_command(const string &message) {
     string new_command = "";
@@ -420,7 +421,7 @@ string Game_Controller::invalid_command(const string &message) {
 }
 
 int Game_Controller::roll_dice() const {
-    if (p_list[turn].die == Dice::FAIR) {
+    if (p_list[turn]->die == Dice::FAIR) {
         std::random_device rd;
         std::mt19937 rng(rd());
         std::uniform_int_distribution<int> dist(2, 12);
@@ -476,8 +477,8 @@ int Game_Controller::get_criterion() const {
 }
 
 bool Game_Controller::is_criterion_owned(const int pos) const {
-    for (int i = 0; i < NUM_PLAYERS; i++) {
-        if (p_list[i].owns_criterion(pos)) {
+    for (int i = 0; i < num_observers; i++) {
+        if (p_list[i]->owns_criterion(pos)) {
             return true;
         }
     }
@@ -485,17 +486,17 @@ bool Game_Controller::is_criterion_owned(const int pos) const {
 }
 
 Player *Game_Controller::get_criterion_owner(const int pos) {
-    for (int i = 0; i < NUM_PLAYERS; i++) {
-        if (p_list[i].owns_criterion(pos)) {
-            return &(p_list[i]);
+    for (int i = 0; i < num_observers; i++) {
+        if (p_list[i]->owns_criterion(pos)) {
+            return (p_list[i].get());
         }
     }
     return nullptr;
 }
 
 bool Game_Controller::is_goal_owned(const int pos) const {
-    for (int i = 0; i < NUM_PLAYERS; i++) {
-        if (p_list[i].owns_goal(pos)) {
+    for (int i = 0; i < num_observers; i++) {
+        if (p_list[i]->owns_goal(pos)) {
             return true;
         }
     }
@@ -548,7 +549,10 @@ bool Game_Controller::check_complete_0(const int pos) const {
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[1]->get_pos()) || (topleft && p_list[turn].owns_goal(topleft->get_goals()[2]->get_pos())) || (top && p_list[turn].owns_goal(top->get_goals()[3]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[0]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[1]->get_pos()) || 
+                       (topleft && p_list[turn]->owns_goal(topleft->get_goals()[2]->get_pos())) || 
+                       (top && p_list[turn]->owns_goal(top->get_goals()[3]->get_pos()));
     }
 
     return can_complete;
@@ -566,12 +570,14 @@ bool Game_Controller::check_complete_1(const int pos) const {
     if (can_complete && topright)
         can_complete = !is_criterion_owned(topright->get_criteria()[0]->get_pos());
     else if (can_complete && top)
-        !is_criterion_owned(top->get_criteria()[3]->get_pos());
-    ;
+        can_complete = !is_criterion_owned(top->get_criteria()[3]->get_pos());
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[0]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[2]->get_pos()) || (topright && p_list[turn].owns_goal(topright->get_goals()[1]->get_pos())) || (top && p_list[turn].owns_goal(top->get_goals()[4]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[0]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[2]->get_pos()) || 
+                       (topright && p_list[turn]->owns_goal(topright->get_goals()[1]->get_pos())) || 
+                       (top && p_list[turn]->owns_goal(top->get_goals()[4]->get_pos()));
     }
 
     return can_complete;
@@ -593,7 +599,10 @@ bool Game_Controller::check_complete_2(const int pos) const {
 
     // if not start of turn and is still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[1]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[3]->get_pos()) || (botleft && p_list[turn].owns_goal(botleft->get_goals()[0]->get_pos())) || (topleft && p_list[turn].owns_goal(topleft->get_goals()[5]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[1]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[3]->get_pos()) || 
+                       (botleft && p_list[turn]->owns_goal(botleft->get_goals()[0]->get_pos())) || 
+                       (topleft && p_list[turn]->owns_goal(topleft->get_goals()[5]->get_pos()));
     }
 
     return can_complete;
@@ -615,7 +624,10 @@ bool Game_Controller::check_complete_3(const int pos) const {
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[2]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[4]->get_pos()) || (botright && p_list[turn].owns_goal(botright->get_goals()[0]->get_pos())) || (topright && p_list[turn].owns_goal(topright->get_goals()[5]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[2]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[4]->get_pos()) || 
+                       (botright && p_list[turn]->owns_goal(botright->get_goals()[0]->get_pos())) || 
+                       (topright && p_list[turn]->owns_goal(topright->get_goals()[5]->get_pos()));
     }
 
     return can_complete;
@@ -637,7 +649,10 @@ bool Game_Controller::check_complete_4(const int pos) const {
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[3]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos()) || (botleft && p_list[turn].owns_goal(botleft->get_goals()[4]->get_pos())) || (bot && p_list[turn].owns_goal(bot->get_goals()[1]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[3]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[5]->get_pos()) || 
+                       (botleft && p_list[turn]->owns_goal(botleft->get_goals()[4]->get_pos())) || 
+                       (bot && p_list[turn]->owns_goal(bot->get_goals()[1]->get_pos()));
     }
 
     return can_complete;
@@ -659,34 +674,38 @@ bool Game_Controller::check_complete_5(const int pos) const {
 
     // if not start of turn and still good, check if current player has completed adjacent goal
     if (can_complete && !sot) {
-        can_complete = p_list[turn].owns_goal(tile->get_goals()[4]->get_pos()) || p_list[turn].owns_goal(tile->get_goals()[5]->get_pos()) || (botright && p_list[turn].owns_goal(botright->get_goals()[3]->get_pos())) || (bot && p_list[turn].owns_goal(bot->get_goals()[2]->get_pos()));
+        can_complete = p_list[turn]->owns_goal(tile->get_goals()[4]->get_pos()) || 
+                       p_list[turn]->owns_goal(tile->get_goals()[5]->get_pos()) || 
+                       (botright && p_list[turn]->owns_goal(botright->get_goals()[3]->get_pos())) || 
+                       (bot && p_list[turn]->owns_goal(bot->get_goals()[2]->get_pos()));
     }
 
     return can_complete;
 }
 
-void Game_Controller::add_resource(const Resources name, Player &player) {
+
+void Game_Controller::add_resource(const Resources name, Player &player, const Criterion *criterion) {
     switch (name) {
         case Resources::CAFFEINE:
-            player.caffeine_count++;
+            player.caffeine_count += criterion->get_level() + 1;
             break;
         case Resources::LAB:
-            player.lab_count++;
+            player.lab_count += criterion->get_level() + 1;
             break;
         case Resources::LECTURE:
-            player.lecture_count++;
+            player.lecture_count += criterion->get_level() + 1;
             break;
         case Resources::STUDY:
-            player.study_count++;
+            player.study_count += criterion->get_level() + 1;
             break;
         case Resources::TUTORIAL:
-            player.tutorial_count++;
+            player.tutorial_count += criterion->get_level() + 1;
             break;
         default:
-            throw std::invalid_argument("Did not provide a valid resource to add");
             break;
     }
 }
+
 
 void Game_Controller::remove_resource(const Resources name, Player &player) {
     switch (name) {
@@ -770,14 +789,14 @@ void Game_Controller::move_geese() {
 }
 
 void Game_Controller::resources_7() {
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < num_observers; i++) {
         int total_resources = get_total_resources(i);
         std::map<Resources, int> resources_lost;
 
         if (total_resources >= 10) {
-            remove_random(total_resources / 2, p_list[i], resources_lost);
+            remove_random(total_resources / 2, *p_list[i], resources_lost);
 
-            cout << "Student " << p_list[i].name << " loses " << total_resources / 2 << " resources to the geese. They lose:\n";
+            cout << "Student " << p_list[i]->name << " loses " << total_resources / 2 << " resources to the geese. They lose:\n";
 
             for (auto const &[resource, count] : resources_lost) {
                 if (count != 0) {
@@ -837,7 +856,7 @@ void Game_Controller::steal(int location) {
     const std::vector<Criterion *> criterions = board.get_tiles()[location]->get_criteria();
 
     string student_to_steal = "";
-    int players_on_map[NUM_PLAYERS]{0};
+    vector<int> players_on_map(num_observers,0);
     int last_student = -1;
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -855,15 +874,15 @@ void Game_Controller::steal(int location) {
     }
 
     if (last_student == -1) {
-        cout << "Student " << p_list[turn].name << " has no students to steal from.\n";
+        cout << "Student " << p_list[turn]->name << " has no students to steal from.\n";
         return;
     }
 
-    cout << "Student " << p_list[turn].name << " can choose to steal from ";
+    cout << "Student " << p_list[turn]->name << " can choose to steal from ";
 
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < num_observers; i++) {
         if (players_on_map[i] > 0) {
-            cout << p_list[i].name;
+            cout << p_list[i]->name;
             if (i != last_student) {
                 cout << ", ";
             }
@@ -894,32 +913,32 @@ void Game_Controller::steal(int location) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-    double prob_caffeine = p_list[idx].caffeine_count / total;
-    double prob_lab = p_list[idx].lab_count / total + prob_caffeine;
-    double prob_lecture = p_list[idx].lecture_count / total + prob_lab;
-    double prob_study = p_list[idx].study_count / total + prob_lecture;
+    double prob_caffeine = p_list[idx]->caffeine_count / total;
+    double prob_lab = p_list[idx]->lab_count / total + prob_caffeine;
+    double prob_lecture = p_list[idx]->lecture_count / total + prob_lab;
+    double prob_study = p_list[idx]->study_count / total + prob_lecture;
 
     double rand = dis(gen);
 
     if (rand <= prob_caffeine) {
-        p_list[turn].caffeine_count += 1;
-        p_list[idx].caffeine_count -= 1;
+        p_list[turn]->caffeine_count += 1;
+        p_list[idx]->caffeine_count -= 1;
         stolen = Resources::CAFFEINE;
     } else if (rand <= prob_lab) {
-        p_list[turn].lab_count += 1;
-        p_list[idx].lab_count -= 1;
+        p_list[turn]->lab_count += 1;
+        p_list[idx]->lab_count -= 1;
         stolen = Resources::LAB;
     } else if (rand <= prob_lecture) {
-        p_list[turn].lecture_count += 1;
-        p_list[idx].lecture_count -= 1;
+        p_list[turn]->lecture_count += 1;
+        p_list[idx]->lecture_count -= 1;
         stolen = Resources::LECTURE;
     } else if (rand <= prob_study) {
-        p_list[turn].study_count += 1;
-        p_list[idx].study_count -= 1;
+        p_list[turn]->study_count += 1;
+        p_list[idx]->study_count -= 1;
         stolen = Resources::STUDY;
     } else {
-        p_list[turn].tutorial_count += 1;
-        p_list[idx].tutorial_count -= 1;
+        p_list[turn]->tutorial_count += 1;
+        p_list[idx]->tutorial_count -= 1;
         stolen = Resources::TUTORIAL;
     }
 
@@ -927,18 +946,18 @@ void Game_Controller::steal(int location) {
 }
 
 void Game_Controller::steal_output(int loser, Resources resource) const {
-    cout << "Student " << p_list[turn].name << " steals " << ResourceToString(resource) << " from student " << p_list[loser].name << ".\n";
+    cout << "Student " << p_list[turn]->name << " steals " << ResourceToString(resource) << " from student " << p_list[loser]->name << ".\n";
 }
 
 int Game_Controller::get_total_resources(const int player_idx) const {
-    return p_list[player_idx].caffeine_count + p_list[player_idx].lab_count + p_list[player_idx].lecture_count + p_list[player_idx].study_count + p_list[player_idx].tutorial_count;
+    return p_list[player_idx]->caffeine_count + p_list[player_idx]->lab_count + p_list[player_idx]->lecture_count + p_list[player_idx]->study_count + p_list[player_idx]->tutorial_count;
 }
 
 void Game_Controller::save_game(const string &filename) const {
     std::ofstream ofs{filename};
 
     ofs << turn << '\n';
-    for (int i = 0; i < NUM_PLAYERS; i++) {
+    for (int i = 0; i < num_observers; i++) {
         output_player(ofs, i);
     }
     output_board(ofs);
@@ -947,17 +966,17 @@ void Game_Controller::save_game(const string &filename) const {
 
 void Game_Controller::output_player(std::ostream &out, const int idx) const {
     // output number of resources for player
-    out << p_list[idx].caffeine_count << ' ' << p_list[idx].lab_count << ' ' << p_list[idx].lecture_count << ' '
-    << p_list[idx].study_count << ' ' << p_list[idx].tutorial_count << " g ";
+    out << p_list[idx]->caffeine_count << ' ' << p_list[idx]->lab_count << ' ' << p_list[idx]->lecture_count << ' '
+    << p_list[idx]->study_count << ' ' << p_list[idx]->tutorial_count << " g ";
 
     // output owned goals
-    for (const auto &goal : p_list[idx].owned_goal) {
+    for (const auto &goal : p_list[idx]->owned_goal) {
         out << goal << ' ';
     }
     out << "c ";
     // there might be an extra space at the end
     //output owned criterions
-    for (const auto &criterion: p_list[idx].owned_criterions) {
+    for (const auto &criterion: p_list[idx]->owned_criterions) {
         out << criterion << ' ' << board.get_criteria()[criterion]->get_level() + 1 << ' ';
     }
     out << '\n';
@@ -976,7 +995,7 @@ void Game_Controller::output_board(std::ostream &out) const {
 void Game_Controller::load_player(const string &data, int idx) {
     std::istringstream iss{data};
 
-    Player &p = p_list[idx];
+    Player &p = *p_list[idx];
 
     string curr = "";
 
@@ -1007,5 +1026,4 @@ void Game_Controller::load_player(const string &data, int idx) {
         p.points += level + 1;
         board.get_criteria()[curr_criterion]->set_level(level);
     }
-
 }
