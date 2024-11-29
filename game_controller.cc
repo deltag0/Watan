@@ -318,16 +318,16 @@ string Game_Controller::check_command(const string &command) {
         save_game(filename);
     } else if (first == "help") {
         cout << "Valid commands:\n"
-             << " board\n"
-             << " status\n"
-             << " criteria\n"
-             << " achieve <goal>\n"
-             << " complete <criterion>\n"
-             << " improve <criterion>\n"
-             << " trade <player> <give> <take>\n"
-             << " next\n"
-             << " save <filename>\n"
-             << " help\n";
+             << "board\n"
+             << "status\n"
+             << "criteria\n"
+             << "achieve <goal>\n"
+             << "complete <criterion>\n"
+             << "improve <criterion>\n"
+             << "trade <player> <give> <take>\n"
+             << "next\n"
+             << "save <filename>\n"
+             << "help\n";
     } else {
         return invalid_command(invalid_message);
     }
@@ -966,18 +966,28 @@ void Game_Controller::save_game(const string &filename) const {
 
 void Game_Controller::output_player(std::ostream &out, const int idx) const {
     // output number of resources for player
-    out << p_list[idx]->caffeine_count << ' ' << p_list[idx]->lab_count << ' ' << p_list[idx]->lecture_count << ' '
-    << p_list[idx]->study_count << ' ' << p_list[idx]->tutorial_count << " g ";
+    out << p_list[idx]->caffeine_count << " " << p_list[idx]->lab_count << " " << p_list[idx]->lecture_count << " "
+    << p_list[idx]->study_count << " " << p_list[idx]->tutorial_count << " g ";
 
     // output owned goals
     for (const auto &goal : p_list[idx]->owned_goal) {
-        out << goal << ' ';
+        out << goal << " ";
     }
-    out << "c ";
+    out << "c";
     // there might be an extra space at the end
     //output owned criterions
+
+    int len = p_list[idx]->owned_criterions.size();
+    int i = 0;
+    if (len > 0) out << " ";
     for (const auto &criterion: p_list[idx]->owned_criterions) {
-        out << criterion << ' ' << board.get_criteria()[criterion]->get_level() + 1 << ' ';
+        if (i != len - 1) {
+            out << criterion << " " << board.get_criteria()[criterion]->get_level() + 1 << " ";
+        }
+        else {
+            out << criterion << " " << board.get_criteria()[criterion]->get_level() + 1;
+        }
+        i++;
     }
     out << '\n';
 }
@@ -986,8 +996,10 @@ void Game_Controller::output_board(std::ostream &out) const {
     for (int i = 0; i < MAX_TILES; i++) {
         int resource_val = ResourceToNum(board.get_tiles()[i]->get_resource());
         int roll_val = board.get_tiles()[i]->get_roll_val();
-
-        out << resource_val << ' ' << roll_val << ' ';
+        out << resource_val << " " << roll_val;
+        if (i != MAX_TILES - 1) {
+            out << " ";
+        }
     }
     out << '\n';
 }
