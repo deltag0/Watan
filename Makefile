@@ -1,5 +1,5 @@
 CXX = g++ -std=c++20 
-EXEC = run
+EXEC = watan
 CXXFLAGS = -Wall -g -O -MMD
 SOURCES = main.cc board.cc asset.cc criterion.cc goal.cc player.cc tile.cc game_controller.cc textview.cc subject.cc
 OBJECTS = $(SOURCES:.cc=.o)
