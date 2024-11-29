@@ -962,6 +962,7 @@ void Game_Controller::save_game(const string &filename) const {
     }
     output_board(ofs);
     ofs << board.get_goose()->get_pos();
+    ofs << '\n';
 }
 
 void Game_Controller::output_player(std::ostream &out, const int idx) const {
