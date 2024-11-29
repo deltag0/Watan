@@ -91,3 +91,4 @@ void TextView::display(Board &b) const {
     // cout << "                                 39             40\n";
     // cout << "                                   \\            /\n";
     // cout << "                                   |32|--44--|33|" << std::endl;
+}
