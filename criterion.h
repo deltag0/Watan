@@ -18,9 +18,6 @@ class Criterion : public Asset {
         Criterion(int pos);
         ~Criterion() = default;
 
-        void set_tile(Tile *t);
-        Tile *get_tile() const;
-
         void increase_level();
         
         // need this function for loading board. maybe revise increase level function

@@ -16,10 +16,6 @@ class Goal : public Asset {
     public:
         Goal(int pos);
         ~Goal() = default;
-        
-        Tile *get_tile();
-        void set_tile(Tile *t);
-
 };
 
 

@@ -21,8 +21,10 @@ class Asset {
         int get_pos();
         std::string get_display();
         const Player *get_player() const;
+        Tile *get_tile() const;
         void set_display(std::string &s);
         void set_player(Player *player);
+        void set_tile(Tile *t);
 };
 
 #endif

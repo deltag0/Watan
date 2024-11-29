@@ -2,10 +2,6 @@
 
 Criterion::Criterion(int pos): Asset(pos) {}
 
-Tile *Criterion::get_tile() const {return tile;}
-
-void Criterion::set_tile(Tile *t) {tile = t;}
-
 int Criterion::get_level() const {return level;}
 
 void Criterion::increase_level() {++level;}
