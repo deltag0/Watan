@@ -20,11 +20,13 @@ using std::vector;
 
 Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load): board{b}, view{v},sot{true}, turn{0} 
         {
+            // initialize all players needed
             attach(std::unique_ptr<Player>{new Player{'B', "Blue", 0}});
             attach(std::unique_ptr<Player>{new Player{'R', "Red", 1}});
             attach(std::unique_ptr<Player>{new Player{'O', "Orange", 2}});
             attach(std::unique_ptr<Player>{new Player{'Y', "Yellow", 3}});
 
+            // if we load game, then players must be initialized
             if (load) {
                 std::ifstream ifs{filename};
                 string line = "";
@@ -42,7 +44,7 @@ Game_Controller::Game_Controller(Board &b, View &v, string filename, bool load):
         }
 
 bool Game_Controller::play() {
-    if (sot) { 
+    if (sot) { // if a game is loaded, this is ommitted
         start_game();
     }
 
@@ -54,6 +56,7 @@ bool Game_Controller::play() {
         if (sot) {
             int roll = 0;
 
+            // output game info
             print_turn();
             print_status();
 
@@ -107,6 +110,7 @@ bool Game_Controller::play() {
 }
 
 void Game_Controller::start_game() {
+    // loop through all observers and set up initial 2 criteria
     for (int i = 0; i < num_observers; i++) {
         int pos = 0;
         cout << "Student " << p_list[i]->name << ", where do you want to complete an Assignment?\n";
@@ -150,6 +154,7 @@ string Game_Controller::check_command(const string &command) {
 
     iss >> first;
 
+    // possible commands for the start of turn and early return
     if (sot) {
         if (first == "load") {
             p_list[turn]->die = Dice::LOADED;
@@ -163,6 +168,9 @@ string Game_Controller::check_command(const string &command) {
         return first;
     }
 
+    // Big if checker for the current command
+    // if multiple commands are included on a single line, the program only accepts it if the
+    // FIRST word is a valid command and throws out everything else
     if (first == "board") {
         view.display(board);
     } else if (first == "status") {
@@ -296,7 +304,7 @@ string Game_Controller::check_command(const string &command) {
             }
         }
 
-        if (ans == "yes") {
+        if (ans == "yes") { // add resources to players
             int &p1_gain_resource = p_list[turn]->find_resources(resource2);
             int student2 = color_to_name(partner);
             int &p2_give_resource = p_list[student2]->find_resources(resource2);
@@ -307,7 +315,7 @@ string Game_Controller::check_command(const string &command) {
             p2_gain_resource++;
             p2_give_resource--;
         }
-    } else if (first == "next") {
+    } else if (first == "next") { // player ended turn
         sot = true;
         turn++;
         if (turn == num_observers) turn = 0;
@@ -352,6 +360,7 @@ void Game_Controller::check_roll(const int roll) {
     std::map<Resources, vector<int>> resources_gained;
     bool gained = false;
 
+    // initialize a map for easy access of gained resources
     for (Resources resource : {Resources::CAFFEINE, Resources::LAB, Resources::LECTURE,
                                Resources::STUDY, Resources::TUTORIAL}) {
         for (int i = 0; i < num_observers; i++) {
@@ -364,6 +373,7 @@ void Game_Controller::check_roll(const int roll) {
         return;
     }
 
+    // check tiles with corresponding roll
     for (auto &tile : board.get_tiles()) {
         assert(tile);
         if (tile->get_roll_val() == roll) {
@@ -417,16 +427,18 @@ string Game_Controller::invalid_command(const string &message) {
         exit(0);
     }
 
+    // recursively call check_command until valid input is received
     return check_command(new_command);
 }
 
 int Game_Controller::roll_dice() const {
+    // randomly roll
     if (p_list[turn]->die == Dice::FAIR) {
         std::random_device rd;
         std::mt19937 rng(rd());
         std::uniform_int_distribution<int> dist(2, 12);
         return dist(rng);
-    } else {
+    } else { // get input
         int roll = 0;
 
         string line = "";
@@ -613,6 +625,7 @@ void Game_Controller::resources_7() {
         int total_resources = get_total_resources(i);
         std::map<Resources, int> resources_lost;
 
+        // condition to remove resources from all players
         if (total_resources >= 10) {
             remove_random(total_resources / 2, *p_list[i], resources_lost);
 
@@ -681,6 +694,7 @@ void Game_Controller::steal(int location) {
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
+    // make sure player has someone to steal from
     for (auto criterion : criterions) {
         if (criterion->get_player() != nullptr) {
             int idx = criterion->get_player()->idx;
@@ -729,6 +743,7 @@ void Game_Controller::steal(int location) {
     double total = static_cast<double>(get_total_resources(idx));
 
     // distribution to generate numbers between 0 and 1 so that we can choose a resource to steal
+    // based on the requirements
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -795,7 +810,6 @@ void Game_Controller::output_player(std::ostream &out, const int idx) const {
         out << goal << " ";
     }
     out << "c";
-    // there might be an extra space at the end
     //output owned criterions
 
     int len = p_list[idx]->owned_criterions.size();

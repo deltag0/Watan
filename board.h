@@ -19,20 +19,32 @@ class Criterion;
 #define CORNERS 6
 #define MAX_TILES 19
 
-// Main board class
-// Includes Tiles, Goose placement, 
+// Main board class (Model)
+// Owns memory for ALL Tiles, Goals and Criterions
+// Board is used to determine valid operations on the board and
+// get data from the board 
 class Board {
     public:
         Board(int seed = 0, bool is_seed = false, std::string filename = "", bool load = false);
+
+        // getters
         const std::vector<std::unique_ptr<Tile>> &get_tiles() const;
         const std::vector<std::unique_ptr<Goal>> &get_goals() const;
         const std::vector<std::unique_ptr<Criterion>> &get_criteria() const;
+
+        // gets the board in file filename at line line_num
         void get_board(const std::string &filename, int line_num);
+
+        // returns a pointer to the tile with the goose
         const Tile *get_goose() const;
+
+        // sets the Tile tile with the goose
         void set_goose(Tile *tile);
 
+        // returns true if player can achieve goal at pos
         bool can_achieve(int pos, Player player) const;
 
+        // returns true if player can complete the criterion at pos
         bool can_complete(const int pos, const bool sot, Player &player) const;
         
 
@@ -82,7 +94,7 @@ enum class Resources {
 };
 
 
-// convert class name to string valued name
+// convert resources to other data types
 std::string ResourceToString(Resources resource);
 
 Resources StringToResource(const std::string &resource);

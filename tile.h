@@ -13,7 +13,7 @@ class Criterion;
 
 // Main Tiles class
 // Includes the resource, the position, the die value, 
-// criterion, and goals
+// Used by Board to determine valid actions
 class Tile {
     public:
         bool has_goose = false;
@@ -33,6 +33,7 @@ class Tile {
         // get tile resource
         Resources get_resource() const;
 
+        // get tile from direction specified
         const Tile* get_bot() const;
         const Tile* get_top() const;
         const Tile* get_bot_left() const;
@@ -40,13 +41,14 @@ class Tile {
         const Tile* get_top_right() const;
         const Tile* get_bot_right() const;
 
-        // functions for print
+        // functions for printing
         std::string display_resource() const;
         std::string display_roll_val() const;
         std::string display_goose() const;
 
     private:
         Tile(Resources r, int pos, int roll_value, Board *board);
+
         Board *board;
         Resources resource;
         int pos;

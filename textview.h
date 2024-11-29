@@ -5,6 +5,7 @@
 
 class TextView : public View {
    public:
+    // displays entire board
     void display(Board &b) const override;
 };
 

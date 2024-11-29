@@ -10,7 +10,7 @@
 class Tile;
 class Asset;
 
-// 54 criteria on one board
+// Buildings that generate resources for players
 class Criterion : public Asset {
     int level = 0;
 
@@ -18,9 +18,10 @@ class Criterion : public Asset {
         Criterion(int pos);
         ~Criterion() = default;
 
+        // increases a level if a player improves it
         void increase_level();
         
-        // need this function for loading board. maybe revise increase level function
+        // need this function for loading board
         void set_level(int l);
         int get_level() const;
 

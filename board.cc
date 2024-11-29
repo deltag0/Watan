@@ -11,44 +11,29 @@
 
 
 Board::Board(int seed, bool is_seed, std::string filename, bool load): all_goals(MAX_GOAL), all_criteria(MAX_CRITERION), tiles(MAX_TILES) {
-    // Initializing every goal
+    // Initializing every goal before linking
     for (int i = 0; i < MAX_GOAL; i++) {
         all_goals[i] = std::make_unique<Goal>(i);
         assert(all_goals[i]);
     }
-    // Initializing every criterion
+    // Initializing every criterion before linking
     for (int i = 0; i < MAX_CRITERION; i++) {
         all_criteria[i] = std::make_unique<Criterion>(i);
         assert(all_criteria[i]);
     }
 
+    // if we have a file, load the board and set tiles
     if (filename != "") {
         // board from a saved game will AFTER the line = number of players + 1
-        if (load) get_board(filename, NUM_PLAYERS + 2);
-        // when only loading the board, board is on the first line
-        else get_board(filename, 1);
+        get_board(filename, NUM_PLAYERS + 2);
     }
-    else {
+    else { // initialize tiles randomly
         initialize_tiles(seed, is_seed);
     }
+
+    // link ALL criteria and goals
     link_criteria();
     link_goals();
-    // for (Tile *&t : tiles) {  <-- debug_print
-    //     std::cout << "Tile " << t->get_pos() << ":" << "\n";
-    //     std::cout << "Criteria 0:" << t->criteria[0]->get_pos() << "\n";
-    //     std::cout << "Criteria 1:" << t->criteria[1]->get_pos() << "\n";
-    //     std::cout << "Criteria 2:" << t->criteria[2]->get_pos() << "\n";
-    //     std::cout << "Criteria 3:" << t->criteria[3]->get_pos() << "\n";
-    //     std::cout << "Criteria 4:" << t->criteria[4]->get_pos() << "\n";
-    //     std::cout << "Criteria 5:" << t->criteria[5]->get_pos() << "\n";
-
-    //     std::cout << "Goal 0:" << t->goals[0]->get_pos() << "\n";
-    //     std::cout << "Goal 1:" << t->goals[1]->get_pos() << "\n";
-    //     std::cout << "Goal 2:" << t->goals[2]->get_pos() << "\n";
-    //     std::cout << "Goal 3:" << t->goals[3]->get_pos() << "\n";
-    //     std::cout << "Goal 4:" << t->goals[4]->get_pos() << "\n";
-    //     std::cout << "Goal 5:" << t->goals[5]->get_pos() << "\n" << std::endl;
-    // }
 }
 
 const std::vector<std::unique_ptr<Tile>> &Board::get_tiles() const { return tiles; }
@@ -61,7 +46,8 @@ const std::vector<std::unique_ptr<Criterion>> &Board::get_criteria() const { ret
 void Board::link_criteria() {
     int curr = 0;
 
-    // set up criteriions
+    // set up criterions according to hexagonal tiles
+    // and board shape
     for (int i = 0; i < MAX_TILES; i++) {
         if (i == 0) {
             tiles[i]->criteria[2] = all_criteria[3].get();
@@ -107,7 +93,6 @@ void Board::link_criteria() {
         tiles[i]->criteria[1] = all_criteria[curr].get();
         curr++;
 
-        // put this in another function maybe?
         // For each criteria, set corresponding tile to tile at earliest position
         for (int j = 0; j < CORNERS; j++) {
             if (tiles[i]->criteria[j]->get_tile() == nullptr) {
@@ -115,17 +100,19 @@ void Board::link_criteria() {
             }
         }
 
-        // make this the algorithm form maybe
+        // This could be algorithmatized easily
         if (i == MAX_TILES - 2) curr += 3;
         else if (i == 5 ||  i == 7 || i == 10 || i == 12 || i == 15) curr++;
     }
 }
 
 void Board::link_goals() {
-    int add_bl = -1;  // hacky variable used to calculate bottom left goal from top left goal
-    int add_b = -1;  // hacky variable used to calculate bottom goal from top goal
+    int add_bl = -1;  // variable used to calculate bottom left goal from top left goal
+    int add_b = -1;  // variable used to calculate bottom goal from top goal
     // initialized to avoid compiler warnings
 
+    // set up goals according to hexagonal tiles
+    // and board shape
     for (int i = 0; i < MAX_TILES; ++i) {
         switch (i) {  // special cases
             case 0:
@@ -198,6 +185,7 @@ void Board::link_goals() {
 // returns: vector with all tiles present in the board
 void Board::initialize_tiles(int seed, bool with_seed) {
 
+    // These must in vectors because we shuffle them
     // Possible resources for a board
     std::vector<Resources> all_resources = 
     {Resources::TUTORIAL,
@@ -306,7 +294,7 @@ void Board::get_board(const std::string &filename, int line_num) {
         iss >> resource_num >> roll_val;
 
         std::unique_ptr<Tile> curr_tile{new Tile{NumToResource(resource_num), i, roll_val, this}};
-        tiles[i] = std::move(curr_tile); // make sure this works with ownership
+        tiles[i] = std::move(curr_tile);
     }
     std::getline(ifs, line);
     std::istringstream iss2{line};
@@ -336,7 +324,7 @@ bool Board::can_achieve(int pos, Player player) const {
 
     assert(position_on_tile >= 0 && position_on_tile < 6);
 
-
+    // check if there is a criterion that the player owns adjacent to the position of the goal
     if ((position_on_tile == 5 && (player.owns_criterion(tile->get_criteria()[4]->get_pos()) || player.owns_criterion(tile->get_criteria()[5]->get_pos()))) ||
     (position_on_tile == 0 && (player.owns_criterion(tile->get_criteria()[0]->get_pos()) || player.owns_criterion(tile->get_criteria()[1]->get_pos()))) ||
     ((position_on_tile != 0 && position_on_tile != 5) &&
@@ -345,6 +333,22 @@ bool Board::can_achieve(int pos, Player player) const {
         return true;
     }
 
+    /* Depending on positon of goal on a tile, check adjacent tiles and current tile to
+    // verify achievement. (i) is the position of each goal on the tile (similar logic for criterion)
+    //                           (0)
+    //                     |32|--44--|33|        
+    //                     /            \             
+    //              (1)   30            31  (2)           
+    //                   /                \            
+    //                 |10|                |10|
+    //                   \                /
+    //              (3)  39             40 (4)
+    //                     \            /
+    //                     |32|--44--|33|
+    //                           (5)
+    //
+    // Each check_goal() functions gets 2 adjacent tiles and verifies, based on the position, for adjacent goals
+    */
     switch (position_on_tile) {
         case 0:
             return check_goal_0(tile, player);
@@ -504,6 +508,7 @@ bool Board::can_complete(const int pos, const bool sot, Player &player) const {
         }
     }
 
+    // similar logic to can_achieve()
     switch (pos_on_tile) {
         case 0:
             return check_complete_0(pos, sot, player);

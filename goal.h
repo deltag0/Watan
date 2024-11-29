@@ -10,7 +10,7 @@
 class Tile;
 class Asset;
 
-// 72 goals on one board
+// Class for all goals on the board
 class Goal : public Asset {  
 
     public:
