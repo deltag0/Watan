@@ -50,7 +50,7 @@ const Tile* Tile::get_top_left() const {
     return tiles[pos - 3].get();
 }
 
-const const Tile* Tile::get_top_right() const {
+const Tile* Tile::get_top_right() const {
     const std::vector<std::unique_ptr<Tile>> &tiles = board->get_tiles();
     if (pos == 0 || pos == 2 || pos == 5 || pos == 10 || pos == 15) return nullptr;
 
